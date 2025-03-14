@@ -6,4 +6,6 @@ easyocr==1.7.1
 Pillow==10.2.0
 python-dotenv==1.0.1
 SQLAlchemy==2.0.27
-Werkzeug==3.0.1 
+Werkzeug==3.0.1
+PyYAML==6.0.1
+pyexiftool==0.5.5

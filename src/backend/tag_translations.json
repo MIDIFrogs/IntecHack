@@ -1,0 +1,322 @@
+{
+    "person": {
+        "en": "person",
+        "ru": "человек"
+    },
+    "bicycle": {
+        "en": "bicycle",
+        "ru": "велосипед"
+    },
+    "car": {
+        "en": "car",
+        "ru": "автомобиль"
+    },
+    "motorcycle": {
+        "en": "motorcycle",
+        "ru": "мотоцикл"
+    },
+    "airplane": {
+        "en": "airplane",
+        "ru": "самолет"
+    },
+    "bus": {
+        "en": "bus",
+        "ru": "автобус"
+    },
+    "train": {
+        "en": "train",
+        "ru": "поезд"
+    },
+    "truck": {
+        "en": "truck",
+        "ru": "грузовик"
+    },
+    "boat": {
+        "en": "boat",
+        "ru": "лодка"
+    },
+    "traffic light": {
+        "en": "traffic light",
+        "ru": "светофор"
+    },
+    "fire hydrant": {
+        "en": "fire hydrant",
+        "ru": "пожарный гидрант"
+    },
+    "stop sign": {
+        "en": "stop sign",
+        "ru": "знак стоп"
+    },
+    "parking meter": {
+        "en": "parking meter",
+        "ru": "парковочный счетчик"
+    },
+    "bench": {
+        "en": "bench",
+        "ru": "скамейка"
+    },
+    "bird": {
+        "en": "bird",
+        "ru": "птица"
+    },
+    "cat": {
+        "en": "cat",
+        "ru": "кошка"
+    },
+    "dog": {
+        "en": "dog",
+        "ru": "собака"
+    },
+    "horse": {
+        "en": "horse",
+        "ru": "лошадь"
+    },
+    "sheep": {
+        "en": "sheep",
+        "ru": "овца"
+    },
+    "cow": {
+        "en": "cow",
+        "ru": "корова"
+    },
+    "elephant": {
+        "en": "elephant",
+        "ru": "слон"
+    },
+    "bear": {
+        "en": "bear",
+        "ru": "медведь"
+    },
+    "zebra": {
+        "en": "zebra",
+        "ru": "зебра"
+    },
+    "giraffe": {
+        "en": "giraffe",
+        "ru": "жираф"
+    },
+    "backpack": {
+        "en": "backpack",
+        "ru": "рюкзак"
+    },
+    "umbrella": {
+        "en": "umbrella",
+        "ru": "зонт"
+    },
+    "handbag": {
+        "en": "handbag",
+        "ru": "сумка"
+    },
+    "tie": {
+        "en": "tie",
+        "ru": "галстук"
+    },
+    "suitcase": {
+        "en": "suitcase",
+        "ru": "чемодан"
+    },
+    "frisbee": {
+        "en": "frisbee",
+        "ru": "фрисби"
+    },
+    "skis": {
+        "en": "skis",
+        "ru": "лыжи"
+    },
+    "snowboard": {
+        "en": "snowboard",
+        "ru": "сноуборд"
+    },
+    "sports ball": {
+        "en": "sports ball",
+        "ru": "спортивный мяч"
+    },
+    "kite": {
+        "en": "kite",
+        "ru": "воздушный змей"
+    },
+    "baseball bat": {
+        "en": "baseball bat",
+        "ru": "бейсбольная бита"
+    },
+    "baseball glove": {
+        "en": "baseball glove",
+        "ru": "бейсбольная перчатка"
+    },
+    "skateboard": {
+        "en": "skateboard",
+        "ru": "скейтборд"
+    },
+    "surfboard": {
+        "en": "surfboard",
+        "ru": "доска для серфинга"
+    },
+    "tennis racket": {
+        "en": "tennis racket",
+        "ru": "теннисная ракетка"
+    },
+    "bottle": {
+        "en": "bottle",
+        "ru": "бутылка"
+    },
+    "wine glass": {
+        "en": "wine glass",
+        "ru": "бокал вина"
+    },
+    "cup": {
+        "en": "cup",
+        "ru": "чашка"
+    },
+    "fork": {
+        "en": "fork",
+        "ru": "вилка"
+    },
+    "knife": {
+        "en": "knife",
+        "ru": "нож"
+    },
+    "spoon": {
+        "en": "spoon",
+        "ru": "ложка"
+    },
+    "bowl": {
+        "en": "bowl",
+        "ru": "миска"
+    },
+    "banana": {
+        "en": "banana",
+        "ru": "банан"
+    },
+    "apple": {
+        "en": "apple",
+        "ru": "яблоко"
+    },
+    "sandwich": {
+        "en": "sandwich",
+        "ru": "сэндвич"
+    },
+    "orange": {
+        "en": "orange",
+        "ru": "апельсин"
+    },
+    "broccoli": {
+        "en": "broccoli",
+        "ru": "брокколи"
+    },
+    "carrot": {
+        "en": "carrot",
+        "ru": "морковь"
+    },
+    "hot dog": {
+        "en": "hot dog",
+        "ru": "хот-дог"
+    },
+    "pizza": {
+        "en": "pizza",
+        "ru": "пицца"
+    },
+    "donut": {
+        "en": "donut",
+        "ru": "пончик"
+    },
+    "cake": {
+        "en": "cake",
+        "ru": "торт"
+    },
+    "chair": {
+        "en": "chair",
+        "ru": "стул"
+    },
+    "couch": {
+        "en": "couch",
+        "ru": "диван"
+    },
+    "potted plant": {
+        "en": "potted plant",
+        "ru": "комнатное растение"
+    },
+    "bed": {
+        "en": "bed",
+        "ru": "кровать"
+    },
+    "dining table": {
+        "en": "dining table",
+        "ru": "обеденный стол"
+    },
+    "toilet": {
+        "en": "toilet",
+        "ru": "туалет"
+    },
+    "tv": {
+        "en": "tv",
+        "ru": "телевизор"
+    },
+    "laptop": {
+        "en": "laptop",
+        "ru": "ноутбук"
+    },
+    "mouse": {
+        "en": "mouse",
+        "ru": "мышь"
+    },
+    "remote": {
+        "en": "remote",
+        "ru": "пульт"
+    },
+    "keyboard": {
+        "en": "keyboard",
+        "ru": "клавиатура"
+    },
+    "cell phone": {
+        "en": "cell phone",
+        "ru": "мобильный телефон"
+    },
+    "microwave": {
+        "en": "microwave",
+        "ru": "микроволновка"
+    },
+    "oven": {
+        "en": "oven",
+        "ru": "духовка"
+    },
+    "toaster": {
+        "en": "toaster",
+        "ru": "тостер"
+    },
+    "sink": {
+        "en": "sink",
+        "ru": "раковина"
+    },
+    "refrigerator": {
+        "en": "refrigerator",
+        "ru": "холодильник"
+    },
+    "book": {
+        "en": "book",
+        "ru": "книга"
+    },
+    "clock": {
+        "en": "clock",
+        "ru": "часы"
+    },
+    "vase": {
+        "en": "vase",
+        "ru": "ваза"
+    },
+    "scissors": {
+        "en": "scissors",
+        "ru": "ножницы"
+    },
+    "teddy bear": {
+        "en": "teddy bear",
+        "ru": "плюшевый мишка"
+    },
+    "hair drier": {
+        "en": "hair drier",
+        "ru": "фен"
+    },
+    "toothbrush": {
+        "en": "toothbrush",
+        "ru": "зубная щетка"
+    }
+} 
