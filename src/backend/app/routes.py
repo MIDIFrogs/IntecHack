@@ -170,7 +170,9 @@ def get_image_text(image_id: int):
         if texts is None:
             return error_response('Image not found', 404)
         
-        return ok_response([text.to_dict() for text in texts])
+        return ok_response({
+            'text': '\n'.join([text.text for text in texts if text is not None])
+        })
 
 @main.route('/api/suggestions', methods=['GET'])
 def get_suggestions():

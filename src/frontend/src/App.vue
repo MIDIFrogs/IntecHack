@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen">
+  <div class="min-h-screen flex flex-col">
     <!-- Fixed Header -->
     <header class="fixed top-0 left-0 right-0 bg-header shadow-[0_4px_6px_-1px_rgba(0,0,0,0.25)] z-50">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -95,7 +95,7 @@
       </div>
     </header>
 
-    <main class="pt-20 max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+    <main class="flex-grow pt-20 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8">
       <!-- Horizontal Album -->
       <div class="mb-8">
         <div class="flex items-center justify-between mb-4">
@@ -150,31 +150,67 @@
       </div>
 
       <!-- Image Grid -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-        <div
-          v-for="image in images"
-          :key="image.id"
-          class="bg-white rounded-lg shadow overflow-hidden"
-        >
-          <img
-            :src="image.url"
-            :alt="image.filename"
-            class="w-full h-48 object-cover cursor-pointer"
-            @click="downloadImage(image.id)"
+      <div class="min-h-[50vh] grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+        <template v-if="images.length > 0">
+          <div
+            v-for="image in images"
+            :key="image.id"
+            class="bg-white rounded-lg shadow overflow-hidden"
           >
-          <div class="p-4">
-            <h3 class="text-lg font-medium mb-2">{{ image.filename }}</h3>
-            <div class="flex flex-wrap gap-2">
-              <span
-                v-for="tag in image.tags"
-                :key="tag.name"
-                class="px-2 py-1 tag-bg rounded-full text-sm tag"
+            <div 
+              class="relative w-full h-48 group cursor-pointer"
+              @mouseenter="fetchImageText(image.id)"
+            >
+              <a 
+                :href="image.urls.download"
+                :download="image.filename"
+                class="block w-full h-full"
+                @click.stop
               >
-                {{ tag.name }}
-              </span>
+                <img
+                  :src="image.urls.thumbnail"
+                  :alt="image.filename"
+                  class="w-full h-full object-cover transition-opacity duration-300 ease-in-out"
+                  :class="{ 'group-hover:opacity-20': image.text }"
+                >
+              </a>
+              <div 
+                v-if="image.text"
+                class="absolute inset-0 bg-black bg-opacity-60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 ease-in-out flex items-center justify-center p-4 overflow-y-auto pointer-events-none"
+              >
+                <p class="text-white text-sm leading-relaxed">{{ image.text }}</p>
+              </div>
+            </div>
+            <div class="p-4">
+              <h3 class="text-lg font-medium mb-2">{{ image.filename }}</h3>
+              <div class="flex flex-wrap gap-2">
+                <span
+                  v-for="tag in image.tags"
+                  :key="tag.name"
+                  class="px-2 py-1 tag-bg rounded-full text-sm tag"
+                >
+                  {{ tag.name }}
+                </span>
+              </div>
             </div>
           </div>
-        </div>
+        </template>
+        <template v-else-if="loadingMore && currentPage === 1">
+          <div
+            v-for="n in 12"
+            :key="n"
+            class="bg-white rounded-lg shadow overflow-hidden animate-pulse"
+          >
+            <div class="w-full h-48 bg-gray-200 dark:bg-gray-700"></div>
+            <div class="p-4">
+              <div class="h-6 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-2"></div>
+              <div class="flex flex-wrap gap-2">
+                <div class="h-6 bg-gray-200 dark:bg-gray-700 rounded w-16"></div>
+                <div class="h-6 bg-gray-200 dark:bg-gray-700 rounded w-20"></div>
+              </div>
+            </div>
+          </div>
+        </template>
       </div>
 
       <!-- Add loading indicator and observer target -->
@@ -183,7 +219,7 @@
         ref="observerTarget"
         class="flex justify-center items-center py-8"
       >
-        <div v-if="loadingMore" class="flex items-center justify-center">
+        <div v-if="loadingMore && currentPage > 1" class="flex items-center justify-center">
           <div class="loading-spinner"></div>
         </div>
       </div>
@@ -281,7 +317,7 @@
     </main>
 
     <!-- Footer -->
-    <footer class="footer-gradient border-t border-gray-800/30 mt-12">
+    <footer class="footer-gradient border-t border-gray-800/30 mt-auto">
       <div class="max-w-7xl mx-auto py-16 px-4 sm:px-6 lg:px-8">
         <div class="grid grid-cols-1 md:grid-cols-5 gap-12">
           <!-- About Section -->
@@ -341,7 +377,7 @@
               </a>
               <a href="#" class="text-gray-300 hover:text-white transition-colors duration-200">
                 <svg class="h-8 w-8" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.161c-.18 1.897-.962 6.502-1.359 8.627-.168.9-.5 1.201-.82 1.23-.697.064-1.226-.461-1.901-.903-1.056-.692-1.653-1.123-2.678-1.799-1.185-.781-.417-1.21.258-1.911.177-.184 3.247-2.977 3.307-3.23.007-.032.015-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.139-5.062 3.345-.479.329-.913.489-1.302.481-.428-.009-1.252-.242-1.865-.44-.751-.245-1.349-.374-1.297-.789.027-.216.324-.437.893-.663 3.498-1.524 5.831-2.529 6.998-3.015 3.333-1.386 4.025-1.627 4.477-1.635.099-.002.321.023.465.137.12.095.145.219.137.342l-.002.001z"/>
+                  <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.161c-.18 1.897-.962 6.502-1.359 8.627-.168.9-.5 1.201-.82 1.23-.697.064-1.226-.461-1.901-.903-1.056-.692-1.653-1.123-2.678-1.799-1.185-.781-.417-1.21.258-1.911.177-.184 3.247-2.977 3.307-3.23.007-.032.015-.056-.056-.212s-.041-.041-.249-.024c-.106.024-1.793 1.139-5.062 3.345-.479.329-.913.489-1.302.481-.428-.009-1.252-.242-1.865-.44-.751-.245-1.349-.374-1.297-.789.027-.216.324-.437.893-.663 3.498-1.524 5.831-2.529 6.998-3.015 3.333-1.386 4.025-1.627 4.477-1.635.099-.002.321.023.465.137.12.095.145.219.137.342l-.002.001z"/>
                 </svg>
               </a>
             </div>
@@ -387,37 +423,63 @@ const uploadProgress = ref([])
 const showAnchor = ref(false)
 const isUploading = ref(false)
 
-// Add new refs for pagination
+// Update refs for pagination
 const currentPage = ref(1)
 const imagesPerPage = ref(12)
-const allImages = ref([])
 const loadingMore = ref(false)
 const hasMoreImages = ref(true)
 const observerTarget = ref(null)
 
 const API_BASE_URL = '/api'
 
-// Add fetchAlbums function
+// Update fetchAlbums function to get first thumbnail for each tag
 const fetchAlbums = async () => {
   try {
-    const response = await axios.get(`${API_BASE_URL}/albums/tags`)
-    // Transform backend data to match our frontend structure
-    albums.value = response.data.map(tag => ({
-      tag: tag.name,
-      thumbnail: tag.thumbnail || 'https://images.unsplash.com/photo-1501854140801-50d01698950b?w=400&h=300&fit=crop',
-      count: tag.count || 0
-    }))
+    const response = await axios.get(`${API_BASE_URL}/tags`)
+    const defaultThumbnail = 'https://images.unsplash.com/photo-1501854140801-50d01698950b?w=400&h=300&fit=crop'
     
-    // Add "All Photos" as first option if not included
-    if (!albums.value.find(album => album.tag === 'Все фото')) {
-      albums.value.unshift({
-        tag: 'Все фото',
-        thumbnail: 'https://images.unsplash.com/photo-1501854140801-50d01698950b?w=400&h=300&fit=crop',
-        count: response.data.reduce((sum, tag) => sum + (tag.count || 0), 0)
-      })
+    // First, get all tags
+    const tagsData = response.data
+
+    // Create the "All Photos" album first
+    const allPhotosAlbum = {
+      tag: 'Все фото',
+      thumbnail: defaultThumbnail,
+      count: tagsData.reduce((sum, tag) => sum + (tag.count || 0), 0)
     }
+
+    // Get thumbnails for each tag
+    const tagAlbums = await Promise.all(tagsData.map(async (tag) => {
+      try {
+        // Search for the first image with this tag
+        const searchResponse = await axios.get(`${API_BASE_URL}/images`, {
+          params: {
+            q: `#${tag.name}`,
+            page: 1,
+            per_page: 1
+          }
+        })
+
+        const firstImage = searchResponse.data.images?.[0]
+        return {
+          tag: tag.name,
+          thumbnail: firstImage ? firstImage.urls.thumbnail : defaultThumbnail,
+          count: tag.count || 0
+        }
+      } catch (error) {
+        console.error(`Error fetching thumbnail for tag ${tag.name}:`, error)
+        return {
+          tag: tag.name,
+          thumbnail: defaultThumbnail,
+          count: tag.count || 0
+        }
+      }
+    }))
+
+    // Combine "All Photos" with tag albums
+    albums.value = [allPhotosAlbum, ...tagAlbums]
   } catch (error) {
-    console.error('Ошибка получения альбомов:', error)
+    console.error('Error fetching albums:', error)
     albums.value = [{
       tag: 'Все фото',
       thumbnail: 'https://images.unsplash.com/photo-1501854140801-50d01698950b?w=400&h=300&fit=crop'
@@ -425,74 +487,90 @@ const fetchAlbums = async () => {
   }
 }
 
-// Update performSearch to use the API for filtered images
+// Update performSearch to properly reset pagination state
 const performSearch = async () => {
   suggestions.value = []
+  currentPage.value = 1
+  hasMoreImages.value = true
+  images.value = []
+  loadingMore.value = false
+  
   try {
-    const params = {}
-    if (selectedTag.value && selectedTag.value !== 'Все фото') {
-      params.tag = selectedTag.value
-    }
-    if (searchQuery.value) {
-      params.q = searchQuery.value // Changed from search to q to match backend API
-    }
-
-    const response = await axios.get(`${API_BASE_URL}/images`, { params })
-    allImages.value = response.data.images // Updated to match API response structure
-    currentPage.value = 1
-    loadInitialImages()
+    await fetchImages()
   } catch (error) {
-    console.error('Ошибка поиска изображений:', error)
-    allImages.value = []
+    console.error('Error searching images:', error)
     images.value = []
+    hasMoreImages.value = false
   }
 }
 
-// Add new function to load initial images
-const loadInitialImages = () => {
-  const start = 0
-  const end = imagesPerPage.value
-  images.value = allImages.value.slice(start, end)
-  hasMoreImages.value = end < allImages.value.length
-}
-
-// Add new function to load more images
-const loadMoreImages = () => {
+// Update fetchImages to handle empty responses
+const fetchImages = async () => {
   if (loadingMore.value || !hasMoreImages.value) return
 
   loadingMore.value = true
   
-  setTimeout(() => {
-    const start = currentPage.value * imagesPerPage.value
-    const end = start + imagesPerPage.value
-    const newImages = allImages.value.slice(start, end)
+  try {
+    const params = {
+      page: currentPage.value,
+      per_page: imagesPerPage.value
+    }
     
-    images.value = [...images.value, ...newImages]
-    currentPage.value++
-    hasMoreImages.value = end < allImages.value.length
+    if (selectedTag.value && selectedTag.value !== 'Все фото') {
+      params.q = `#${selectedTag.value}`
+    }
+    if (searchQuery.value) {
+      params.q = searchQuery.value
+    }
+
+    const response = await axios.get(`${API_BASE_URL}/images`, { params })
+    
+    const newImages = response.data.images || []
+    
+    // Only clear existing images if this is the first page
+    if (currentPage.value === 1) {
+      // Wait a small delay before replacing images to prevent flicker
+      await new Promise(resolve => setTimeout(resolve, 100))
+      images.value = newImages
+    } else {
+      images.value = [...images.value, ...newImages]
+    }
+    
+    hasMoreImages.value = newImages.length >= imagesPerPage.value
+    if (hasMoreImages.value) {
+      currentPage.value++
+    }
+  } finally {
     loadingMore.value = false
-  }, 300) // Small delay to prevent rapid loading
+  }
 }
 
-// Add intersection observer setup
+// Update setupIntersectionObserver to handle cleanup
+let currentObserver = null
+
 const setupIntersectionObserver = () => {
+  // Cleanup existing observer if any
+  if (currentObserver) {
+    currentObserver.disconnect()
+  }
+
   const options = {
     root: null,
     rootMargin: '100px',
     threshold: 0.1
   }
 
-  const observer = new IntersectionObserver((entries) => {
+  currentObserver = new IntersectionObserver((entries) => {
     if (entries[0].isIntersecting && !loadingMore.value && hasMoreImages.value) {
-      loadMoreImages()
+      fetchImages()
     }
   }, options)
 
   if (observerTarget.value) {
-    observer.observe(observerTarget.value)
+    currentObserver.observe(observerTarget.value)
   }
 
-  return observer
+  return currentObserver
 }
 
 // Select suggestion
@@ -539,10 +617,11 @@ const scrollAlbum = (direction) => {
   }
 }
 
-// Select album
-const selectAlbum = (tag) => {
+// Update selectAlbum to properly reset pagination
+const selectAlbum = async (tag) => {
   selectedTag.value = tag
-  performSearch()
+  await performSearch()
+  setupIntersectionObserver() // Reinitialize observer after album change
 }
 
 // Handle file selection
@@ -584,10 +663,10 @@ const closeUploadModal = () => {
   }
 }
 
-// Update uploadImages function
+// Update uploadImages function to use correct endpoint
 const uploadImages = async () => {
   if (selectedFiles.value.length === 0) {
-    alert('Пожалуйста, выберите изображения')
+    alert('Please select images')
     return
   }
 
@@ -599,7 +678,7 @@ const uploadImages = async () => {
       const formData = new FormData()
       formData.append('file', file)
 
-      return axios.post(`${API_BASE_URL}/upload`, formData, {
+      return axios.post(`${API_BASE_URL}/images/upload`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         },
@@ -611,38 +690,15 @@ const uploadImages = async () => {
     })
 
     await Promise.all(uploadPromises)
-    
-    // Wait a short moment for backend processing
     await new Promise(resolve => setTimeout(resolve, 1000))
-    
-    // Refresh the image list and albums after upload
     await fetchAlbums()
     await performSearch()
-    
     closeUploadModal()
   } catch (error) {
-    console.error('Ошибка загрузки изображений:', error)
-    alert('Ошибка загрузки изображений. Пожалуйста, попробуйте снова.')
+    console.error('Error uploading images:', error)
+    alert('Error uploading images. Please try again.')
   } finally {
     isUploading.value = false
-  }
-}
-
-// Download image
-const downloadImage = async (imageId) => {
-  try {
-    const response = await axios.get(`${API_BASE_URL}/images/${imageId}`, {
-      responseType: 'blob'
-    })
-    const url = window.URL.createObjectURL(new Blob([response.data]))
-    const link = document.createElement('a')
-    link.href = url
-    link.setAttribute('download', 'изображение.jpg')
-    document.body.appendChild(link)
-    link.click()
-    link.remove()
-  } catch (error) {
-    console.error('Ошибка скачивания изображения:', error)
   }
 }
 
@@ -719,6 +775,32 @@ watch(showUploadModal, (newValue) => {
   }
 })
 
+// Update watch handlers for search
+watch(searchQuery, async (newValue, oldValue) => {
+  if (newValue !== oldValue) {
+    suggestions.value = []
+    if (!newValue.trim()) {
+      await performSearch()
+      setupIntersectionObserver()
+    }
+  }
+})
+
+// Add fetchImageText function after fetchImages function
+const fetchImageText = async (imageId) => {
+  const image = images.value.find(img => img.id === imageId)
+  if (!image || image.text) return // Skip if already fetched
+
+  try {
+    const response = await axios.get(`${API_BASE_URL}/images/${imageId}/text`)
+    // Update the image object with the text
+    image.text = response.data.text || 'No text found in image'
+  } catch (error) {
+    console.error('Error fetching image text:', error)
+    image.text = 'Error loading text'
+  }
+}
+
 // Initial load
 onMounted(() => {
   initTheme()
@@ -728,20 +810,11 @@ onMounted(() => {
   window.addEventListener('resize', handleResize)
   window.addEventListener('scroll', handleScroll)
   
-  // Add scroll event listener to update button visibility
   if (albumContainer.value) {
     albumContainer.value.addEventListener('scroll', updateScrollButtons)
   }
 
-  // Setup intersection observer
-  const observer = setupIntersectionObserver()
-
-  // Cleanup observer on unmount
-  onUnmounted(() => {
-    if (observerTarget.value) {
-      observer.unobserve(observerTarget.value)
-    }
-  })
+  setupIntersectionObserver()
 })
 
 // Clean up event listener
@@ -750,6 +823,9 @@ onUnmounted(() => {
   window.removeEventListener('scroll', handleScroll)
   if (albumContainer.value) {
     albumContainer.value.removeEventListener('scroll', updateScrollButtons)
+  }
+  if (currentObserver) {
+    currentObserver.disconnect()
   }
 })
 </script>
@@ -824,11 +900,24 @@ header{
 
 /* Update image card background */
 .bg-white.rounded-lg {
-  background-color: #ffffff !important;
+  background-color: #ffffff;
 }
 
 .dark .bg-white.rounded-lg {
-  background-color: #282828 !important;
+  background-color: #282828;
+}
+
+/* Add specific styles for image container */
+.bg-white.rounded-lg img {
+  filter: none;  /* Remove any potential filters */
+  mix-blend-mode: normal;  /* Reset blend mode */
+  backface-visibility: hidden;  /* Prevent any 3D effects */
+  transform: translateZ(0);  /* Force GPU acceleration */
+}
+
+/* Ensure proper contrast for image container */
+.bg-white.rounded-lg .p-4 {
+  background-color: inherit;
 }
 
 .tag-bg {  
@@ -934,5 +1023,42 @@ input {
   to {
     transform: rotate(360deg);
   }
+}
+
+/* Add new styles for footer positioning */
+.flex-grow {
+  flex: 1 0 auto;
+}
+
+footer {
+  flex-shrink: 0;
+}
+
+/* Update main padding to ensure content doesn't get hidden under the footer */
+main {
+  padding-bottom: 2rem;
+}
+
+/* Add styles for text overlay scrollbar */
+.group:hover .overflow-y-auto::-webkit-scrollbar {
+  width: 4px;
+}
+
+.group:hover .overflow-y-auto::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.group:hover .overflow-y-auto::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 2px;
+}
+
+.group:hover .overflow-y-auto::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.7);
+}
+
+/* Ensure text is readable */
+.text-white {
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
 </style> 
