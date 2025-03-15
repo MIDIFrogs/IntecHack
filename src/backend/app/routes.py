@@ -8,18 +8,20 @@ This module defines the REST API endpoints for:
 - Image text retrieval
 """
 
-from typing import Dict, Any, Tuple, List, Iterable
-from flask import Blueprint, request, jsonify, send_file, Response, send_from_directory
+from typing import Any, Tuple
+from flask import Blueprint, request, jsonify, Response, send_from_directory
 import os
 import logging
 from werkzeug.utils import secure_filename
 from app.services import image_service, image_repository
-from app.models import Image
 from config import Config
 from pathlib import Path
+from threading import Lock
 
 logger = logging.getLogger(__name__)
 main = Blueprint('main', __name__)
+
+db_lock = Lock()
 
 def error_response(message: str, status_code: int = 500) -> Tuple[Response, int]:
     """Create a JSON error response.
@@ -83,20 +85,39 @@ def upload_image():
     file = request.files['file']
     if not file or not file.filename:
         return error_response('Invalid file', 400)
+    
+    try:
+        filename, filepath = _ensure_unique_filename(
+            secure_filename(file.filename), 
+            Config.UPLOAD_FOLDER
+        )
         
-    # Ensure safe and unique filename
-    filename, filepath = _ensure_unique_filename(
-        secure_filename(file.filename), 
-        Config.UPLOAD_FOLDER
-    )
-    
-    file.save(filepath)
-    result = image_service.process_image(filepath)
-    
-    return ok_response({
-        "filename": filename,
-        "id": result.id
-    })
+        file.save(filepath)
+        processing_result = image_service.process_image_only(filepath)
+        
+        with db_lock:
+            logger.debug("Acquiring lock for database operations")
+            image = image_repository.save_image(
+                filename=processing_result.filename,
+                detected_objects=processing_result.objects,
+                texts=processing_result.texts
+            )
+            logger.debug("Released lock after database operations")
+            
+        return ok_response({
+            "filename": filename,
+            "id": image.id
+        })
+            
+    except Exception as e:
+        logger.error(f"Error during image upload: {str(e)}", exc_info=True)
+        # Clean up the file if there was an error
+        try:
+            if os.path.exists(filepath):
+                os.remove(filepath)
+        except Exception as cleanup_error:
+            logger.error(f"Failed to clean up file after error: {cleanup_error}")
+        return error_response(f"Failed to process image: {str(e)}", 500)
 
 @main.route('/api/images', methods=['GET'])
 def search_images():
@@ -106,12 +127,13 @@ def search_images():
     per_page = int(request.args.get('per_page', 12))
     locale = request.args.get('locale', 'en')
     
-    images, total = image_repository.search_images(
-        query=query, 
-        page=page, 
-        per_page=per_page,
-        locale=locale
-    )
+    with db_lock:
+        images, total = image_repository.search_images(
+            query=query, 
+            page=page, 
+            per_page=per_page,
+            locale=locale
+        )
     
     return ok_response({
         'images': [img.detection_summary for img in images],
@@ -123,11 +145,12 @@ def search_images():
 @main.route('/api/images/<int:image_id>', methods=['GET'])
 def get_image(image_id: int):
     """Get image details by ID."""
-    image = image_repository.get_image_by_id(image_id)
-    if not image:
-        return error_response('Image not found', 404)
+    with db_lock:
+        image = image_repository.get_image_by_id(image_id)
+        if not image:
+            return error_response('Image not found', 404)
         
-    return ok_response(image.detection_summary)
+        return ok_response(image.detection_summary)
 
 @main.route('/api/images/<int:image_id>/file', methods=['GET'])
 def get_image_file(image_id: int):
@@ -141,11 +164,12 @@ def get_image_file(image_id: int):
 @main.route('/api/images/<int:image_id>/text', methods=['GET'])
 def get_image_text(image_id: int):
     """Get detected text for an image."""
-    texts = image_repository.get_image_text(image_id)
-    if texts is None:
-        return error_response('Image not found', 404)
+    with db_lock:
+        texts = image_repository.get_image_text(image_id)
+        if texts is None:
+            return error_response('Image not found', 404)
         
-    return ok_response([text.to_dict() for text in texts])
+        return ok_response([text.to_dict() for text in texts])
 
 @main.route('/api/suggestions', methods=['GET'])
 def get_suggestions():
@@ -154,11 +178,12 @@ def get_suggestions():
     limit = int(request.args.get('limit', 5))
     locale = request.args.get('locale', 'en')
     
-    suggestions = image_repository.get_suggestions(
-        query=query,
-        limit=limit,
-        locale=locale
-    )
+    with db_lock:
+        suggestions = image_repository.get_suggestions(
+            query=query,
+            limit=limit,
+            locale=locale
+        )
     
     return ok_response(suggestions)
 
@@ -174,16 +199,13 @@ def get_available_tags() -> Tuple[Response, int]:
     """
     try:
         locale = request.args.get('locale', 'en')
-        logger.info(f"Getting available tags for locale: {locale}")
         
-        tags = sorted(image_repository._tag_cache)
-        response = [{
-            'name': Config.get_tag_translation(tag, locale),
-            'original_name': tag
-        } for tag in tags]
-        
-        logger.info(f"Returning {len(tags)} tags")
-        logger.debug(f"Tags response: {response}")
+        with db_lock:
+            tags = sorted(image_repository._tag_cache)
+            response = [{
+                'name': Config.get_tag_translation(tag, locale),
+                'original_name': tag
+            } for tag in tags]
         
         return ok_response(response)
         
