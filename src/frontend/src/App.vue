@@ -735,7 +735,6 @@ const handleFileSelect = (event) => {
   if (file && file.type.startsWith('image/')) {
     selectedFile.value = file
     previewUrl.value = URL.createObjectURL(file)
-    imageName.value = file.name
   }
 }
 
@@ -745,7 +744,6 @@ const handleDrop = (event) => {
   if (file && file.type.startsWith('image/')) {
     selectedFile.value = file
     previewUrl.value = URL.createObjectURL(file)
-    imageName.value = file.name
     fileInput.value.files = event.dataTransfer.files
   }
 }
@@ -755,7 +753,6 @@ const closeUploadModal = () => {
   showUploadModal.value = false
   selectedFile.value = null
   previewUrl.value = null
-  imageName.value = ''
   if (fileInput.value) {
     fileInput.value.value = ''
   }
@@ -772,20 +769,24 @@ const uploadImage = async () => {
   formData.append('file', selectedFile.value)
 
   try {
-    console.log('Загрузка файла:', imageName.value || selectedFile.value.name)
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    console.log('Загрузка файла:', selectedFile.value.name)
+    const response = await axios.post(`${API_BASE_URL}/upload`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    })
     
+    // Get the uploaded image details from the backend
+    const imageResponse = await axios.get(`${API_BASE_URL}/images/${response.data.id}`)
     const newImage = {
-      id: mockImages.all.length + 1,
-      filename: imageName.value || selectedFile.value.name,
-      tags: [{ name: 'Новое' }],
+      id: response.data.id,
+      filename: selectedFile.value.name,
+      tags: imageResponse.data.tags,
       url: URL.createObjectURL(selectedFile.value)
     }
     
-    mockImages.all.unshift(newImage)
-    mockImages['Новое'] = [newImage]
-    
-    images.value = mockImages.all
+    // Update the images list
+    images.value = [newImage, ...images.value]
     closeUploadModal()
   } catch (error) {
     console.error('Ошибка загрузки изображения:', error)
@@ -857,7 +858,6 @@ const focusSearch = () => {
 const removeSelectedFile = () => {
   selectedFile.value = null
   previewUrl.value = null
-  imageName.value = ''
   if (fileInput.value) {
     fileInput.value.value = ''
   }

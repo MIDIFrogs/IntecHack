@@ -2,7 +2,7 @@
 echo Starting development servers...
 
 :: Start backend server
-start cmd /k "cd src\backend && python -m venv venv && venv\Scripts\activate && pip install -r requirements.txt && python run.py"
+start cmd /k "cd src\backend && python -m venv venv && venv\Scripts\activate && pip install -r requirements.txt && python server.py"
 
 :: Start frontend server
 start cmd /k "cd src\frontend && npm install && npm run dev"
