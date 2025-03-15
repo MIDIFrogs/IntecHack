@@ -17,8 +17,10 @@ Technical Requirements
 --------------------
 - Python 3.x
 - Node.js and npm
-- Flask
 - Vue.js 3
+- Flask
+- PyTorch
+- YOLOv8
 - SQLite
 
 - Application uses Flask for backend app and Vue.JS for frontend.
