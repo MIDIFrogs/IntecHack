@@ -13,6 +13,7 @@ from ultralytics import YOLO
 import easyocr
 from app.models import DetectedText, DetectedObject, DetectionResult
 from config import Config
+from app.services.spell_checker import SpellChecker
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +33,8 @@ class VisionProcessor:
         """Initialize vision processor with lazy-loaded models."""
         self._yolo_model: Optional[YOLO] = None
         self._ocr_reader: Optional[easyocr.Reader] = None
-    
+        self.spell_checker = SpellChecker()
+
     @property
     def yolo_model(self) -> YOLO:
         """Get or initialize YOLO model.
@@ -141,7 +143,7 @@ class VisionProcessor:
                 # Convert bbox to flat list of integers for JSON storage
                 flat_bbox = [int(coord) for point in bbox for coord in point]
                 texts.append(DetectedText(
-                    text=text,
+                    text=self.spell_checker.correct_text(text),
                     confidence=conf,
                     bbox=flat_bbox
                 ))

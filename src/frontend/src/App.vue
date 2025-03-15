@@ -678,7 +678,7 @@ const uploadImages = async () => {
       const formData = new FormData()
       formData.append('file', file)
 
-      return axios.post(`${API_BASE_URL}/images/upload`, formData, {
+      return axios.post(`${API_BASE_URL}/upload`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         },
@@ -901,10 +901,12 @@ header{
 /* Update image card background */
 .bg-white.rounded-lg {
   background-color: #ffffff;
+  color: #212020;
 }
 
 .dark .bg-white.rounded-lg {
   background-color: #282828;
+  color: #f2f1f1;
 }
 
 /* Add specific styles for image container */
@@ -1060,5 +1062,10 @@ main {
 /* Ensure text is readable */
 .text-white {
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+/* Add dark tint for text overlay */
+.group:hover .bg-black.bg-opacity-60 {
+  background-color: #282828;
 }
 </style> 
