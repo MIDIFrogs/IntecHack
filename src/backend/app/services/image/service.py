@@ -13,7 +13,7 @@ from werkzeug.utils import secure_filename
 from app.services.vision.processor import vision_processor
 from config import Config
 import json
-from PIL import Image, ExifTags
+from PIL import Image
 import piexif
 from app.models import DetectedObject, DetectedText, DetectionResult
 
@@ -116,7 +116,7 @@ class ImageService:
             # Special case for the JPEG images
             if ext in ['.jpg', '.jpeg']:
                 # Get current EXIF data
-                exif_dict = piexif.load(image.info.get('exif', b''))
+                exif_dict = piexif.load(filepath)
                 
                 metadata = json.dumps({
                     "objects": objects,
@@ -125,7 +125,7 @@ class ImageService:
 
                 # Add or update tag ExifComment
                 user_comment = metadata.encode('utf-8')
-                exif_dict['Exif'][piexif.ExifIFDName.UserComment] = user_comment
+                exif_dict['Exif'][piexif.ExifIFD.UserComment] = user_comment
 
                 # Save EXIF tags into JPEG
                 exif_bytes = piexif.dump(exif_dict)

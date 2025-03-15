@@ -192,6 +192,24 @@ class ImageRepository:
         except SQLAlchemyError as e:
             logger.error(f"Failed to get texts for image {image_id}: {str(e)}", exc_info=True)
             raise
+    
+    def get_all_tags(self) -> List[str]:
+        """Get all tag names from the database.
+        
+        Returns:
+            List[str]: List of all tag names
+            
+        Raises:
+            SQLAlchemyError: If database operation fails
+        """
+        try:
+            tags = select(Tag.name)
+            result = self.session.scalars(tags).all()
+            return list(result)
+            
+        except SQLAlchemyError as e:
+            logger.error(f"Failed to get all tags: {str(e)}", exc_info=True)
+            raise
 
 # Create a singleton instance
 image_repository = ImageRepository() 

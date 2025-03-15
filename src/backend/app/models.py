@@ -11,6 +11,7 @@ from typing import Dict, Any, List, Set
 from datetime import datetime
 from app.services.database import db
 from dataclasses import dataclass
+from flask import url_for
 
 # Association table for tags (many-to-many)
 image_tags = db.Table(
@@ -186,6 +187,9 @@ class Image(db.Model):
             'filename': self.filename,
             'created_at': self.created_at.isoformat(),
             'tags': [{'name': tag.name, 'confidence': 1.0} for tag in self.tags],
-            'objects': [obj.to_dict() for obj in self.objects],
-            'texts': [text.to_dict() for text in self.texts]
+            'texts': [text.to_dict() for text in self.texts],
+            'urls': {
+                'download': url_for('main.download_image', image_id=self.id, _external=True),
+                'thumbnail': url_for('main.get_image_thumbnail', image_id=self.id, _external=True)
+            }
         }

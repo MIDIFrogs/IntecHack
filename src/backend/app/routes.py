@@ -9,7 +9,7 @@ This module defines the REST API endpoints for:
 """
 
 from typing import Any, Tuple
-from flask import Blueprint, request, jsonify, Response, send_from_directory
+from flask import Blueprint, request, jsonify, Response, send_from_directory, send_file
 import os
 import logging
 from werkzeug.utils import secure_filename
@@ -17,6 +17,10 @@ from app.services import image_service, image_repository
 from config import Config
 from pathlib import Path
 from threading import Lock
+from PIL import Image as PILImage
+import io
+import cv2
+import imutils
 
 logger = logging.getLogger(__name__)
 main = Blueprint('main', __name__)
@@ -198,7 +202,7 @@ def get_available_tags() -> Tuple[Response, int]:
         locale = request.args.get('locale', 'en')
         
         with db_lock:
-            tags = sorted(image_repository._tag_cache)
+            tags = sorted(image_repository.get_all_tags())
             response = [{
                 'name': Config.get_tag_translation(tag, locale),
                 'original_name': tag
@@ -208,5 +212,51 @@ def get_available_tags() -> Tuple[Response, int]:
         
     except Exception as e:
         logger.error(f"Error in get_available_tags:", e)
-        return error_response(str(e), 500) 
+        return error_response(str(e), 500)
+
+@main.route('/api/images/<int:image_id>/download', methods=['GET'])
+def download_image(image_id: int):
+    """Download original image file."""
+    image = image_repository.get_image_by_id(image_id)
+    if not image:
+        return error_response('Image not found', 404)
+        
+    return send_from_directory(
+        Config.UPLOAD_FOLDER, 
+        image.filename,
+        as_attachment=True,
+        download_name=image.filename
+    )
+
+@main.route('/api/images/<int:image_id>/thumbnail', methods=['GET'])
+def get_image_thumbnail(image_id: int):
+    """Get image thumbnail."""
+    image = image_repository.get_image_by_id(image_id)
+    if not image:
+        return error_response('Image not found', 404)
+        
+    try:
+        # Read image with OpenCV
+        image_path = os.path.join(Config.UPLOAD_FOLDER, image.filename)
+        img = cv2.imread(image_path)
+        if img is None:
+            return error_response('Failed to read image', 500)
+            
+        # Resize maintaining aspect ratio
+        img = imutils.resize(img, width=300)
+        
+        # Encode to JPEG
+        _, buffer = cv2.imencode('.jpg', img, [cv2.IMWRITE_JPEG_QUALITY, 85])
+        img_bytes = io.BytesIO(buffer)
+        
+        return send_file(
+            img_bytes,
+            mimetype='image/jpeg',
+            download_name=f"thumb_{image.filename}",
+            max_age=86400  # Cache for 24 hours
+        )
+            
+    except Exception as e:
+        logger.error(f"Error generating thumbnail: {str(e)}", exc_info=True)
+        return error_response('Error generating thumbnail', 500) 
     
