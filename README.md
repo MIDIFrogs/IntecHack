@@ -1,4 +1,4 @@
-ImageHound - Image Processing and Search Application
+## **ImageHound** - Image Processing and Search Application
 
 A modern web application for uploading, organizing, and searching images with automatic tag generation using AI-powered object detection and text recognition.
 
