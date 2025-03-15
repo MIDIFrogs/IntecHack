@@ -397,315 +397,55 @@ const observerTarget = ref(null)
 
 const API_BASE_URL = '/api'
 
-// Mock data for testing
-const mockAlbums = [
-  {
-    tag: 'Все фото',
-    thumbnail: 'https://images.unsplash.com/photo-1501854140801-50d01698950b?w=400&h=300&fit=crop'
-  },
-  {
-    tag: 'Природа',
-    thumbnail: 'https://images.unsplash.com/photo-1501854140801-50d01698950b?w=400&h=300&fit=crop'
-  },
-  {
-    tag: 'Город',
-    thumbnail: 'https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=400&h=300&fit=crop'
-  },
-  {
-    tag: 'Технологии',
-    thumbnail: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=400&h=300&fit=crop'
-  },
-  {
-    tag: 'Еда',
-    thumbnail: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&h=300&fit=crop'
-  },
-  {
-    tag: 'Путешествия',
-    thumbnail: 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=400&h=300&fit=crop'
-  },
-  {
-    tag: 'Архитектура',
-    thumbnail: 'https://images.unsplash.com/photo-1487958449943-2429e8be8625?w=400&h=300&fit=crop'
-  },
-  {
-    tag: 'Животные',
-    thumbnail: 'https://images.unsplash.com/photo-1474314170901-f351b68f544f?w=400&h=300&fit=crop'
-  },
-  {
-    tag: 'Искусство',
-    thumbnail: 'https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b?w=400&h=300&fit=crop'
-  }
-]
-
-const mockImages = {
-  all: [
-    // Default photos
-    {
-      id: 1,
-      filename: 'Недавнее фото 1',
-      tags: [{ name: 'Природа' }, { name: 'Недавнее' }],
-      url: 'https://images.unsplash.com/photo-1501854140801-50d01698950b?w=400&h=300&fit=crop'
-    },
-    {
-      id: 2,
-      filename: 'Недавнее фото 2',
-      tags: [{ name: 'Город' }, { name: 'Недавнее' }],
-      url: 'https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=400&h=300&fit=crop'
-    },
-    {
-      id: 3,
-      filename: 'Недавнее фото 3',
-      tags: [{ name: 'Технологии' }, { name: 'Недавнее' }],
-      url: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=400&h=300&fit=crop'
-    },
-    {
-      id: 4,
-      filename: 'Недавнее фото 4',
-      tags: [{ name: 'Еда' }, { name: 'Недавнее' }],
-      url: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&h=300&fit=crop'
-    },
-    // Nature photos
-    {
-      id: 5,
-      filename: 'Природа фото 1',
-      tags: [{ name: 'Природа' }, { name: 'Пейзаж' }],
-      url: 'https://images.unsplash.com/photo-1501854140801-50d01698950b?w=400&h=300&fit=crop'
-    },
-    {
-      id: 6,
-      filename: 'Природа фото 2',
-      tags: [{ name: 'Природа' }, { name: 'Горы' }],
-      url: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=400&h=300&fit=crop'
-    },
-    {
-      id: 7,
-      filename: 'Природа фото 3',
-      tags: [{ name: 'Природа' }, { name: 'Лес' }],
-      url: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=400&h=300&fit=crop'
-    },
-    {
-      id: 8,
-      filename: 'Природа фото 4',
-      tags: [{ name: 'Природа' }, { name: 'Океан' }],
-      url: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400&h=300&fit=crop'
-    },
-    // City photos
-    {
-      id: 9,
-      filename: 'Город фото 1',
-      tags: [{ name: 'Город' }, { name: 'Городской' }],
-      url: 'https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=400&h=300&fit=crop'
-    },
-    {
-      id: 10,
-      filename: 'Город фото 2',
-      tags: [{ name: 'Город' }, { name: 'Архитектура' }],
-      url: 'https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?w=400&h=300&fit=crop'
-    },
-    {
-      id: 11,
-      filename: 'Город фото 3',
-      tags: [{ name: 'Город' }, { name: 'Улица' }],
-      url: 'https://images.unsplash.com/photo-1449157291145-7efd050a4d0e?w=400&h=300&fit=crop'
-    },
-    {
-      id: 12,
-      filename: 'Город фото 4',
-      tags: [{ name: 'Город' }, { name: 'Ночь' }],
-      url: 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=400&h=300&fit=crop'
-    },
-    // Technology photos
-    {
-      id: 13,
-      filename: 'Технологии фото 1',
-      tags: [{ name: 'Технологии' }, { name: 'Устройства' }],
-      url: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=400&h=300&fit=crop'
-    },
-    {
-      id: 14,
-      filename: 'Технологии фото 2',
-      tags: [{ name: 'Технологии' }, { name: 'Инновации' }],
-      url: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=400&h=300&fit=crop'
-    },
-    {
-      id: 15,
-      filename: 'Технологии фото 3',
-      tags: [{ name: 'Технологии' }, { name: 'ИИ' }],
-      url: 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=400&h=300&fit=crop'
-    },
-    {
-      id: 16,
-      filename: 'Технологии фото 4',
-      tags: [{ name: 'Технологии' }, { name: 'Робототехника' }],
-      url: 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=400&h=300&fit=crop'
-    },
-    // Food photos
-    {
-      id: 17,
-      filename: 'Еда фото 1',
-      tags: [{ name: 'Еда' }, { name: 'Кухня' }],
-      url: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&h=300&fit=crop'
-    },
-    {
-      id: 18,
-      filename: 'Еда фото 2',
-      tags: [{ name: 'Еда' }, { name: 'Ресторан' }],
-      url: 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=400&h=300&fit=crop'
-    },
-    {
-      id: 19,
-      filename: 'Еда фото 3',
-      tags: [{ name: 'Еда' }, { name: 'Десерт' }],
-      url: 'https://images.unsplash.com/photo-1551024506-0bccd828d307?w=400&h=300&fit=crop'
-    },
-    {
-      id: 20,
-      filename: 'Еда фото 4',
-      tags: [{ name: 'Еда' }, { name: 'Здоровое' }],
-      url: 'https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=400&h=300&fit=crop'
-    },
-    // Travel photos
-    {
-      id: 21,
-      filename: 'Путешествия фото 1',
-      tags: [{ name: 'Путешествия' }, { name: 'Приключения' }],
-      url: 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=400&h=300&fit=crop'
-    },
-    {
-      id: 22,
-      filename: 'Путешествия фото 2',
-      tags: [{ name: 'Путешествия' }, { name: 'Пейзаж' }],
-      url: 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=400&h=300&fit=crop'
-    },
-    {
-      id: 23,
-      filename: 'Путешествия фото 3',
-      tags: [{ name: 'Путешествия' }, { name: 'Культура' }],
-      url: 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=400&h=300&fit=crop'
-    },
-    {
-      id: 24,
-      filename: 'Путешествия фото 4',
-      tags: [{ name: 'Путешествия' }, { name: 'Пляж' }],
-      url: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400&h=300&fit=crop'
-    },
-    // Architecture photos
-    {
-      id: 25,
-      filename: 'Архитектура фото 1',
-      tags: [{ name: 'Архитектура' }, { name: 'Современная' }],
-      url: 'https://images.unsplash.com/photo-1487958449943-2429e8be8625?w=400&h=300&fit=crop'
-    },
-    {
-      id: 26,
-      filename: 'Архитектура фото 2',
-      tags: [{ name: 'Архитектура' }, { name: 'Классическая' }],
-      url: 'https://images.unsplash.com/photo-1487958449943-2429e8be8625?w=400&h=300&fit=crop'
-    },
-    {
-      id: 27,
-      filename: 'Архитектура фото 3',
-      tags: [{ name: 'Архитектура' }, { name: 'Интерьер' }],
-      url: 'https://images.unsplash.com/photo-1487958449943-2429e8be8625?w=400&h=300&fit=crop'
-    },
-    {
-      id: 28,
-      filename: 'Архитектура фото 4',
-      tags: [{ name: 'Архитектура' }, { name: 'Дизайн' }],
-      url: 'https://images.unsplash.com/photo-1487958449943-2429e8be8625?w=400&h=300&fit=crop'
-    },
-    // Animals photos
-    {
-      id: 29,
-      filename: 'Животные фото 1',
-      tags: [{ name: 'Животные' }, { name: 'Дикая природа' }],
-      url: 'https://images.unsplash.com/photo-1474314170901-f351b68f544f?w=400&h=300&fit=crop'
-    },
-    {
-      id: 30,
-      filename: 'Животные фото 2',
-      tags: [{ name: 'Животные' }, { name: 'Питомцы' }],
-      url: 'https://images.unsplash.com/photo-1474314170901-f351b68f544f?w=400&h=300&fit=crop'
-    },
-    {
-      id: 31,
-      filename: 'Животные фото 3',
-      tags: [{ name: 'Животные' }, { name: 'Природа' }],
-      url: 'https://images.unsplash.com/photo-1474314170901-f351b68f544f?w=400&h=300&fit=crop'
-    },
-    {
-      id: 32,
-      filename: 'Животные фото 4',
-      tags: [{ name: 'Животные' }, { name: 'Птицы' }],
-      url: 'https://images.unsplash.com/photo-1474314170901-f351b68f544f?w=400&h=300&fit=crop'
-    },
-    // Art photos
-    {
-      id: 33,
-      filename: 'Искусство фото 1',
-      tags: [{ name: 'Искусство' }, { name: 'Живопись' }],
-      url: 'https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b?w=400&h=300&fit=crop'
-    },
-    {
-      id: 34,
-      filename: 'Искусство фото 2',
-      tags: [{ name: 'Искусство' }, { name: 'Скульптура' }],
-      url: 'https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b?w=400&h=300&fit=crop'
-    },
-    {
-      id: 35,
-      filename: 'Искусство фото 3',
-      tags: [{ name: 'Искусство' }, { name: 'Цифровое' }],
-      url: 'https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b?w=400&h=300&fit=crop'
-    },
-    {
-      id: 36,
-      filename: 'Искусство фото 4',
-      tags: [{ name: 'Искусство' }, { name: 'Фотография' }],
-      url: 'https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b?w=400&h=300&fit=crop'
-    }
-  ]
-}
-
-// Debounce function
-const debounce = (fn, delay) => {
-  let timeoutId
-  return (...args) => {
-    clearTimeout(timeoutId)
-    timeoutId = setTimeout(() => fn(...args), delay)
-  }
-}
-
-// Handle search input
-const handleSearch = debounce(async () => {
-  if (searchQuery.value.length < 2) {
-    suggestions.value = []
-    return
-  }
-  
+// Fetch albums
+const fetchAlbums = async () => {
   try {
-    const response = await axios.get(`${API_BASE_URL}/suggestions`, {
-      params: { q: searchQuery.value }
-    })
-    suggestions.value = response.data
+    const response = await axios.get(`${API_BASE_URL}/albums/tags`)
+    // Transform backend data to match our frontend structure
+    albums.value = response.data.map(tag => ({
+      tag: tag.name,
+      thumbnail: tag.thumbnail || 'https://images.unsplash.com/photo-1501854140801-50d01698950b?w=400&h=300&fit=crop', // Default thumbnail if none provided
+      count: tag.count || 0 // Optional: number of images with this tag
+    }))
+    
+    // Add "All Photos" as first option if not included
+    if (!albums.value.find(album => album.tag === 'Все фото')) {
+      albums.value.unshift({
+        tag: 'Все фото',
+        thumbnail: 'https://images.unsplash.com/photo-1501854140801-50d01698950b?w=400&h=300&fit=crop',
+        count: response.data.reduce((sum, tag) => sum + (tag.count || 0), 0)
+      })
+    }
   } catch (error) {
-    console.error('Ошибка получения предложений:', error)
+    console.error('Ошибка получения альбомов:', error)
+    // Fallback to empty array if API fails
+    albums.value = [{
+      tag: 'Все фото',
+      thumbnail: 'https://images.unsplash.com/photo-1501854140801-50d01698950b?w=400&h=300&fit=crop'
+    }]
   }
-}, 300)
+}
 
-// Modify performSearch to handle pagination
+// Update performSearch to use the API for filtered images
 const performSearch = async () => {
   suggestions.value = []
   try {
-    if (selectedTag.value === 'Все фото' || !selectedTag.value) {
-      allImages.value = mockImages.all
-    } else {
-      allImages.value = mockImages[selectedTag.value] || []
+    const params = {}
+    if (selectedTag.value && selectedTag.value !== 'Все фото') {
+      params.tag = selectedTag.value
     }
+    if (searchQuery.value) {
+      params.search = searchQuery.value
+    }
+
+    const response = await axios.get(`${API_BASE_URL}/images`, { params })
+    allImages.value = response.data
     currentPage.value = 1
     loadInitialImages()
   } catch (error) {
     console.error('Ошибка поиска изображений:', error)
+    allImages.value = []
+    images.value = []
   }
 }
 
@@ -804,15 +544,6 @@ const scrollAlbum = (direction) => {
 const selectAlbum = (tag) => {
   selectedTag.value = tag
   performSearch()
-}
-
-// Fetch albums
-const fetchAlbums = async () => {
-  try {
-    albums.value = mockAlbums
-  } catch (error) {
-    console.error('Ошибка получения альбомов:', error)
-  }
 }
 
 // Handle file selection
