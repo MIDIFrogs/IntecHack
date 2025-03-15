@@ -793,13 +793,88 @@ const fetchImageText = async (imageId) => {
 
   try {
     const response = await axios.get(`${API_BASE_URL}/images/${imageId}/text`)
-    // Update the image object with the text
-    image.text = response.data.text || 'No text found in image'
+    let text = response.data.text || ''
+    
+    if (!text.trim()) {
+      image.text = 'No text found in image'
+      return
+    }
+
+    // Clean up the text by removing excessive spaces and normalizing line breaks
+    text = text.replace(/\s+/g, ' ').trim()
+    
+    try {
+      // Try to correct the text spelling
+      const correctionResponse = await axios.post(`${API_BASE_URL}/correct_text`, { text })
+      const correctedText = correctionResponse.data.text
+      
+      // Check if the corrected text makes sense
+      // If more than 70% of words are unchanged or recognized, consider it valid
+      const originalWords = text.toLowerCase().split(/\s+/)
+      const correctedWords = correctedText.toLowerCase().split(/\s+/)
+      const unchangedWords = originalWords.filter(word => correctedWords.includes(word))
+      const textQuality = unchangedWords.length / originalWords.length
+      
+      if (textQuality > 0.3 && correctedText.length > 10) {
+        image.text = correctedText
+      } else {
+        image.text = 'Text not recognized'
+      }
+    } catch (error) {
+      console.error('Error correcting text:', error)
+      // If spell checking fails, return cleaned original text if it seems valid
+      if (text.length > 10 && text.split(/\s+/).length > 2) {
+        image.text = text
+      } else {
+        image.text = 'Text not recognized'
+      }
+    }
   } catch (error) {
     console.error('Error fetching image text:', error)
     image.text = 'Error loading text'
   }
 }
+
+// Add handleSearch function after searchQuery ref declaration
+const handleSearch = async () => {
+  try {
+    if (!searchQuery.value.trim()) {
+      suggestions.value = []
+      return
+    }
+
+    // Get suggestions from the API using the correct endpoint
+    const response = await axios.get(`${API_BASE_URL}/suggestions`, {
+      params: {
+        q: searchQuery.value
+      }
+    })
+
+    // Update suggestions array directly from the response
+    suggestions.value = response.data
+  } catch (error) {
+    console.error('Error fetching suggestions:', error)
+    suggestions.value = []
+  }
+}
+
+// Update the debounce for search input
+let searchTimeout = null
+watch(searchQuery, (newValue) => {
+  if (searchTimeout) {
+    clearTimeout(searchTimeout)
+  }
+  
+  searchTimeout = setTimeout(async () => {
+    if (newValue.trim()) {
+      await handleSearch()
+    } else {
+      suggestions.value = []
+      await performSearch()
+      setupIntersectionObserver()
+    }
+  }, 300) // 300ms debounce
+})
 
 // Initial load
 onMounted(() => {

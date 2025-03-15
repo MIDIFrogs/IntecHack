@@ -57,6 +57,9 @@ class Config:
         }
     }
     
+    # Spell checking configuration
+    ENABLE_SPELL_CHECK=False
+
     # Tag translations
     TAG_TRANSLATIONS_FILE: Path = BASE_DIR / 'tag_translations.json'
     _tag_translations: Dict[str, Dict[str, str]] = {}

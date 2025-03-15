@@ -33,7 +33,8 @@ class VisionProcessor:
         """Initialize vision processor with lazy-loaded models."""
         self._yolo_model: Optional[YOLO] = None
         self._ocr_reader: Optional[easyocr.Reader] = None
-        self.spell_checker = SpellChecker()
+        if Config.ENABLE_SPELL_CHECK:
+            self.spell_checker = SpellChecker()
 
     @property
     def yolo_model(self) -> YOLO:
@@ -143,7 +144,7 @@ class VisionProcessor:
                 # Convert bbox to flat list of integers for JSON storage
                 flat_bbox = [int(coord) for point in bbox for coord in point]
                 texts.append(DetectedText(
-                    text=self.spell_checker.correct_text(text),
+                    text=self.spell_checker.correct_text(text) if Config.ENABLE_SPELL_CHECK else text,
                     confidence=conf,
                     bbox=flat_bbox
                 ))
