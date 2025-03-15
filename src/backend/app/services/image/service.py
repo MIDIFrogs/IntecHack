@@ -22,8 +22,7 @@ logger = logging.getLogger('app.services.image')
 
 class ProcessingResult:
     """Result of image processing"""
-    def __init__(self, id: int, filename: str, objects: List[DetectedObject], texts: List[DetectedText]):
-        self.id = id
+    def __init__(self, filename: str, objects: List[DetectedObject], texts: List[DetectedText]):
         self.filename = filename
         self.objects = objects
         self.texts = texts
@@ -74,14 +73,14 @@ class ImageService:
         logger.info(f"Saved image file: {filepath}")
         return filepath
 
-    def process_image(self, filepath: str) -> ProcessingResult:
-        """Process image file with vision services and save results
+    def process_image_only(self, filepath: str) -> ProcessingResult:
+        """Process image file with vision services without database operations
         
         Args:
             filepath (str): Path to the image file to process
             
         Returns:
-            An instance of ProcessingResult with the results of the image processing
+            ProcessingResult with the results of the image processing
         """
         logger.info(f"Processing image: {filepath}")
         
@@ -90,13 +89,7 @@ class ImageService:
         
         filename = os.path.basename(filepath)
         
-        image = image_repository.save_image(filename, result.objects, result.texts)
-        logger.debug(f"Saved image to database with ID: {image.id}")
-        
-        #self._update_image_metadata(filepath, result)
-        
         return ProcessingResult(
-            id=image.id,
             filename=filename,
             objects=result.objects,
             texts=result.texts
