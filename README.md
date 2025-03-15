@@ -12,7 +12,8 @@ ImageHound is a full-stack web application that allows users to:
 - Download images
 - View images by albums/categories
 - Switch between light and dark themes
-
+- 
+<img width="960" alt="requirements" src="https://github.com/user-attachments/assets/34c6441e-67df-486a-b0d2-deeaae360dae" />
 Technical Requirements
 --------------------
 - Python 3.x
