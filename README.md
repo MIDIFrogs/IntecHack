@@ -67,7 +67,7 @@ Setup Instructions
 
 1. Clone the repository:
    ```
-   git clone https://https://github.com/MIDIFrogs/IntecHack.git
+   git clone https://github.com/MIDIFrogs/IntecHack.git
    cd IntecHack
    ```
 
