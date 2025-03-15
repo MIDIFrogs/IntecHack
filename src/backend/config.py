@@ -52,7 +52,7 @@ class Config:
             'confidence': 0.25
         },
         'ocr': {
-            'languages': ['en'],
+            'languages': ['en', 'ru'],
             'confidence': 0.5
         }
     }

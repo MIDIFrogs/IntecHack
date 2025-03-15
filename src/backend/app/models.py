@@ -7,8 +7,9 @@ This module defines SQLAlchemy models for:
 - Detected text
 """
 
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Tuple, Set
 from datetime import datetime
+import os
 from app.services.database import db
 from dataclasses import dataclass
 
@@ -35,6 +36,41 @@ class Tag(db.Model):
 
     def __repr__(self) -> str:
         return f'<Tag {self.name}>'
+
+    @classmethod
+    def get_or_create(cls, name: str, session) -> 'Tag':
+        """Get an existing tag or create a new one.
+        
+        Args:
+            name: The tag name to look up or create
+            session: SQLAlchemy session to use
+            
+        Returns:
+            An existing or new Tag instance
+        """
+        name = name.lower()
+        tag = session.query(cls).filter_by(name=name).first()
+        if tag is None:
+            tag = cls(name=name)
+            session.add(tag)
+        return tag
+
+    @classmethod
+    def get_or_create_many(cls, names: List[str], session) -> List['Tag']:
+        """Get or create multiple tags at once.
+        
+        Args:
+            names: List of tag names to look up or create
+            session: SQLAlchemy session to use
+            
+        Returns:
+            List of Tag instances
+        """
+        tags = []
+        for name in names:
+            tags.append(cls.get_or_create(name, session))
+        session.commit()
+        return tags
 
 class DetectedObject(db.Model):
     """Object detected by YOLO model"""
@@ -89,7 +125,7 @@ class DetectedText(db.Model):
 @dataclass
 class DetectionResult:
     """Combined result of image detection."""
-    objects: List[Dict[str, Any]]
+    objects: List[DetectedObject]
     texts: List[DetectedText]
 
 class Image(db.Model):
@@ -117,8 +153,31 @@ class Image(db.Model):
     )
 
     def __init__(self, filename: str) -> None:
-        """Initialize an image with its filename."""
+        """Initialize an image.
+        
+        Args:
+            filename: The filename to use (must be unique)
+        """
         self.filename = filename
+
+    def add_tags_from_objects(self, detected_objects: List[DetectedObject], session) -> None:
+        """Add tags to the image based on detected objects.
+        
+        This method automatically creates tags from detected object classes
+        and handles tag deduplication.
+        
+        Args:
+            detected_objects: List of detected objects to create tags from
+            session: SQLAlchemy session to use
+        """
+        # Get unique class names from objects
+        unique_tags: Set[str] = {obj.class_name.lower() for obj in detected_objects}
+        
+        # Get or create tags and add them to the image
+        for tag_name in unique_tags:
+            tag = Tag.get_or_create(tag_name, session)
+            if tag not in self.tags:  # Avoid duplicate tags
+                self.tags.append(tag)
 
     @property
     def detection_summary(self) -> Dict[str, Any]:

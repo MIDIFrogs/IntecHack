@@ -93,7 +93,7 @@ class ImageService:
         image = image_repository.save_image(filename, result.objects, result.texts)
         logger.debug(f"Saved image to database with ID: {image.id}")
         
-        self._update_image_metadata(filepath, result)
+        #self._update_image_metadata(filepath, result)
         
         return ProcessingResult(
             id=image.id,
@@ -127,7 +127,7 @@ class ImageService:
             'IPTC:Caption-Abstract': '; '.join(text_content),
             
             'EXIF:ImageDescription': f"Objects: {', '.join(object_tags)}; Texts: {', '.join(text_content)}",
-            'EXIF:UserComment': json.dumps(result.to_dict()),
+            'EXIF:UserComment': json.dumps(self._get_metadata_dict(result)),
             
             'FileModifyDate': datetime.now().strftime('%Y:%m:%d %H:%M:%S')
         }
