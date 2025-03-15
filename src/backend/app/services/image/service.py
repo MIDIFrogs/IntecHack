@@ -8,14 +8,13 @@ This module provides functionality for:
 
 import os
 import logging
-from typing import Dict, Any, List
+from typing import List
 from werkzeug.utils import secure_filename
 from app.services.vision.processor import vision_processor
-from app.services.database.repository import image_repository
 from config import Config
 import json
-#import exiftool
-from datetime import datetime
+from PIL import Image, ExifTags
+import piexif
 from app.models import DetectedObject, DetectedText, DetectionResult
 
 logger = logging.getLogger('app.services.image')
@@ -37,11 +36,9 @@ class ImageService:
             os.makedirs(self.upload_folder, exist_ok=True)
             logger.info(f"Upload directory initialized: {self.upload_folder}")
         except Exception as e:
-            logger.critical(f"Failed to create upload directory {self.upload_folder}: {str(e)}")
+            logger.fatal(f"Failed to create upload directory {self.upload_folder}: {str(e)}")
             raise RuntimeError(f"Cannot initialize upload directory: {str(e)}")
-
-        #self.et = exiftool.ExifToolHelper()
-        logger.info("ImageService initialized with ExifTool")
+        logger.info("ImageService initialized successfully.")
 
     def is_allowed_file(self, filename: str) -> bool:
         """Check if file has an allowed extension
@@ -87,6 +84,8 @@ class ImageService:
         result = vision_processor.process_image(filepath)
         logger.debug(f"Vision processing results - Objects: {len(result.objects)}, Texts: {len(result.texts)}")
         
+        self._update_image_metadata(filepath, result)
+
         filename = os.path.basename(filepath)
         
         return ProcessingResult(
@@ -95,91 +94,58 @@ class ImageService:
             texts=result.texts
         )
 
-    def _get_metadata_dict(self, result: DetectionResult) -> Dict[str, Any]:
-        """Convert detection results to a metadata dictionary suitable for ExifTool
-        
-        Args:
-            result (DetectionResult): Combined detection results
-            
-        Returns:
-            Dict[str, Any]: Metadata dictionary containing:
-                - XMP tags for structured data storage
-                - IPTC tags for searchable keywords
-                - EXIF tags for basic compatibility
-                - File modification timestamp
-        """
-        object_tags = [f"{obj.class_name}({obj.confidence:.2f})" for obj in result.objects]
-        text_content = [f"{text.text}({text.confidence:.2f})" for text in result.texts]
-        
-        # Return a dictionary of tags to save in metadata with all the values for the current detection result
-        return {
-            'XMP:DetectedObjects': json.dumps([obj.to_dict() for obj in result.objects]),
-            'XMP:DetectedTexts': json.dumps([text.to_dict() for text in result.texts]),
-            
-            'IPTC:Keywords': object_tags,
-            'IPTC:Caption-Abstract': '; '.join(text_content),
-            
-            'EXIF:ImageDescription': f"Objects: {', '.join(object_tags)}; Texts: {', '.join(text_content)}",
-            'EXIF:UserComment': json.dumps(self._get_metadata_dict(result)),
-            
-            'FileModifyDate': datetime.now().strftime('%Y:%m:%d %H:%M:%S')
-        }
-
     def _update_image_metadata(self, filepath: str, result: DetectionResult):
-        """Update image metadata using ExifTool
+        """Update image metadata using PIL images library
         
         Args:
             filepath (str): Path to the image file to update
             result (DetectionResult): Combined detection results
             
         Note:
-            This method writes metadata in multiple formats:
-            - XMP for structured data
-            - IPTC for searchable keywords
-            - EXIF for basic compatibility
+            This method saves results in metadata depending on file format.
         """
         try:
-            metadata = self._get_metadata_dict(result)
-            self.et.set_tags(filepath, metadata)
+            objects = [obj.to_dict() for obj in result.objects]
+            texts = [text.to_dict() for text in result.texts]
+            
+            _, ext = os.path.splitext(filepath)
+            ext = ext.lower()
+
+            image = Image.open(filepath)
+
+            # Special case for the JPEG images
+            if ext in ['.jpg', '.jpeg']:
+                # Get current EXIF data
+                exif_dict = piexif.load(image.info.get('exif', b''))
+                
+                metadata = json.dumps({
+                    "objects": objects,
+                    "texts": texts
+                })
+
+                # Add or update tag ExifComment
+                user_comment = metadata.encode('utf-8')
+                exif_dict['Exif'][piexif.ExifIFDName.UserComment] = user_comment
+
+                # Save EXIF tags into JPEG
+                exif_bytes = piexif.dump(exif_dict)
+                image.save(filepath, exif=exif_bytes)
+
+            elif ext in ['.png', '.gif', '.webp']:
+                image.info['text'] = json.dump(texts)
+                image.info['objects'] = json.dump(objects)
+                if (ext == '.png'):
+                    image.save(filepath, pnginfo=image.info)
+                elif (ext == '.gif'):
+                    image.save(filepath, save_all=True)
+                elif (ext == '.webp'):
+                    image.save(filepath, **image.info)
+
+            else:
+                raise ValueError("Unsupported file format: {}".format(ext))
             logger.debug(f"Updated metadata for {filepath}")
             
         except Exception as e:
             logger.error(f"Could not update image metadata: {str(e)}", exc_info=True)
-
-    def get_image_metadata(self, filepath: str) -> DetectionResult:
-        """Read image metadata using ExifTool
-        
-        Args:
-            filepath (str): Path to the image file to read metadata from
-            
-        Returns:
-            DetectionResult: Combined detection results containing detected objects and texts
-                
-        Note:
-            Returns empty DetectionResult if no metadata is found or if metadata cannot be read
-        """
-        try:
-            metadata = self.et.get_metadata(filepath)[0]
-            logger.debug(f"Read metadata from {filepath}")
-            
-            for key in ('XMP:DetectedObjects', 'EXIF:UserComment'):
-                if key in metadata:
-                    try:
-                        data = json.loads(metadata[key])
-                        if isinstance(data, dict) and 'objects' in data and 'texts' in data:
-                            return DetectionResult.from_dict(data)
-                        return DetectionResult(
-                            objects=[DetectedObject.from_dict(obj) for obj in data],
-                            texts=[DetectedText.from_dict(text) for text in json.loads(metadata.get('XMP:DetectedTexts', '[]'))]
-                        )
-                    except:
-                        continue
-            
-            logger.warning(f"No metadata found for {filepath}")
-            return DetectionResult(objects=[], texts=[])
-            
-        except Exception as e:
-            logger.error(f"Could not read image metadata: {str(e)}", exc_info=True)
-            return DetectionResult(objects=[], texts=[])
 
 image_service = ImageService() 

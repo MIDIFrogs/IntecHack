@@ -7,9 +7,8 @@ This module defines SQLAlchemy models for:
 - Detected text
 """
 
-from typing import Dict, Any, List, Tuple, Set
+from typing import Dict, Any, List, Set
 from datetime import datetime
-import os
 from app.services.database import db
 from dataclasses import dataclass
 
@@ -178,7 +177,7 @@ class Image(db.Model):
             tag = Tag.get_or_create(tag_name, session)
             if tag not in self.tags:  # Avoid duplicate tags
                 self.tags.append(tag)
-
+    
     @property
     def detection_summary(self) -> Dict[str, Any]:
         """Get a summary of detections for API responses."""

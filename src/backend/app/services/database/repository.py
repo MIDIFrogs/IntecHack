@@ -7,7 +7,7 @@ This module provides database operations for:
 """
 
 import logging
-from typing import List, Optional, Tuple, Set, Dict
+from typing import List, Optional, Tuple
 from sqlalchemy import select, func, create_engine
 from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.exc import SQLAlchemyError

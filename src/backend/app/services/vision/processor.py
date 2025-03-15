@@ -169,11 +169,13 @@ class VisionProcessor:
             FileNotFoundError: If image file doesn't exist
             RuntimeError: If processing fails
         """
+        # Check for image file existence
         image_path = Path(image_path)
         if not image_path.exists():
             logger.error(f"Image not found: {image_path}")
             raise FileNotFoundError(f"Image not found: {image_path}")
         
+        # Perform processing with YOLO and OCR
         try:
             logger.info(f"Starting image processing for {image_path}")
             objects = self.get_objects(str(image_path))

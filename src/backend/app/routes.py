@@ -87,10 +87,7 @@ def upload_image():
         return error_response('Invalid file', 400)
     
     try:
-        filename, filepath = _ensure_unique_filename(
-            secure_filename(file.filename), 
-            Config.UPLOAD_FOLDER
-        )
+        filename, filepath = _ensure_unique_filename(secure_filename(file.filename), Config.UPLOAD_FOLDER)
         
         file.save(filepath)
         processing_result = image_service.process_image_only(filepath)
@@ -109,9 +106,9 @@ def upload_image():
             "id": image.id
         })
             
+    # Remove up the file if there was an error
     except Exception as e:
-        logger.error(f"Error during image upload: {str(e)}", exc_info=True)
-        # Clean up the file if there was an error
+        logger.error(f"Error during image upload:", e)
         try:
             if os.path.exists(filepath):
                 os.remove(filepath)
@@ -210,6 +207,6 @@ def get_available_tags() -> Tuple[Response, int]:
         return ok_response(response)
         
     except Exception as e:
-        logger.error(f"Error in get_available_tags: {str(e)}", exc_info=True)
+        logger.error(f"Error in get_available_tags:", e)
         return error_response(str(e), 500) 
     

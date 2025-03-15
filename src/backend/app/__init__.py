@@ -9,7 +9,7 @@ import logging
 from flask import Flask
 from flask_cors import CORS
 from config import Config
-from app.services.database import db, init_database, verify_database_setup
+from app.services.database import init_database, verify_database_setup
 
 # Setup logging
 logging.basicConfig(
