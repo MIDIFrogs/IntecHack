@@ -16,8 +16,6 @@ import logging
 from typing import List, Tuple, Optional
 import webbrowser
 import time
-import pkg_resources
-from pkg_resources import DistributionNotFound, VersionConflict
 
 # Setup logging
 logging.basicConfig(
@@ -145,34 +143,17 @@ class ProcessManager:
             return False
             
         try:
-            # Read requirements
-            with open(requirements_file, 'r') as f:
-                requirements = [line.strip() for line in f if line.strip() and not line.startswith('#')]
-            
-            # Check what's missing
-            missing = []
-            for requirement in requirements:
-                try:
-                    pkg_resources.require(requirement)
-                except (DistributionNotFound, VersionConflict):
-                    missing.append(requirement)
-            
-            if missing:
-                logger.info(f"Installing missing packages: {', '.join(missing)}")
-                try:
-                    subprocess.check_call([
-                        sys.executable, "-m", "pip", "install",
-                        "-r", requirements_file
-                    ])
-                    logger.info("All requirements installed successfully")
-                except subprocess.CalledProcessError as e:
-                    logger.error(f"Failed to install requirements: {e}")
-                    return False
-            else:
-                logger.info("All requirements already satisfied")
-            
+            logger.info("Installing Python requirements...")
+            subprocess.check_call([
+                sys.executable, "-m", "pip", "install",
+                "-r", requirements_file
+            ])
+            logger.info("All requirements installed successfully")
             return True
             
+        except subprocess.CalledProcessError as e:
+            logger.error(f"Failed to install requirements: {e}")
+            return False
         except Exception as e:
             logger.error(f"Error checking requirements: {e}")
             return False
