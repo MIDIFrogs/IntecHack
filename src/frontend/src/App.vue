@@ -397,15 +397,15 @@ const observerTarget = ref(null)
 
 const API_BASE_URL = '/api'
 
-// Fetch albums
+// Add fetchAlbums function
 const fetchAlbums = async () => {
   try {
     const response = await axios.get(`${API_BASE_URL}/albums/tags`)
     // Transform backend data to match our frontend structure
     albums.value = response.data.map(tag => ({
       tag: tag.name,
-      thumbnail: tag.thumbnail || 'https://images.unsplash.com/photo-1501854140801-50d01698950b?w=400&h=300&fit=crop', // Default thumbnail if none provided
-      count: tag.count || 0 // Optional: number of images with this tag
+      thumbnail: tag.thumbnail || 'https://images.unsplash.com/photo-1501854140801-50d01698950b?w=400&h=300&fit=crop',
+      count: tag.count || 0
     }))
     
     // Add "All Photos" as first option if not included
@@ -418,7 +418,6 @@ const fetchAlbums = async () => {
     }
   } catch (error) {
     console.error('Ошибка получения альбомов:', error)
-    // Fallback to empty array if API fails
     albums.value = [{
       tag: 'Все фото',
       thumbnail: 'https://images.unsplash.com/photo-1501854140801-50d01698950b?w=400&h=300&fit=crop'
@@ -435,11 +434,11 @@ const performSearch = async () => {
       params.tag = selectedTag.value
     }
     if (searchQuery.value) {
-      params.search = searchQuery.value
+      params.q = searchQuery.value // Changed from search to q to match backend API
     }
 
     const response = await axios.get(`${API_BASE_URL}/images`, { params })
-    allImages.value = response.data
+    allImages.value = response.data.images // Updated to match API response structure
     currentPage.value = 1
     loadInitialImages()
   } catch (error) {
@@ -585,7 +584,7 @@ const closeUploadModal = () => {
   }
 }
 
-// Update uploadImage function
+// Update uploadImages function
 const uploadImages = async () => {
   if (selectedFiles.value.length === 0) {
     alert('Пожалуйста, выберите изображения')
@@ -611,19 +610,15 @@ const uploadImages = async () => {
       })
     })
 
-    const responses = await Promise.all(uploadPromises)
+    await Promise.all(uploadPromises)
     
-    const imageResponses = await Promise.all(responses.map(async (response, index) => {
-      const imageResponse = await axios.get(`${API_BASE_URL}/images/${response.data.id}`)
-      return {
-        id: response.data.id,
-        filename: selectedFiles.value[index].name,
-        tags: imageResponse.data.tags,
-        url: URL.createObjectURL(selectedFiles.value[index])
-      }
-    }))
+    // Wait a short moment for backend processing
+    await new Promise(resolve => setTimeout(resolve, 1000))
     
-    images.value = [...imageResponses, ...images.value]
+    // Refresh the image list and albums after upload
+    await fetchAlbums()
+    await performSearch()
+    
     closeUploadModal()
   } catch (error) {
     console.error('Ошибка загрузки изображений:', error)
