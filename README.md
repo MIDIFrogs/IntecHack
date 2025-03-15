@@ -20,7 +20,6 @@ Technical Requirements
 - Vue.js 3
 - Flask
 - PyTorch
-- YOLOv8
 - SQLite
 
 - Application uses Flask for backend app and Vue.JS for frontend.
