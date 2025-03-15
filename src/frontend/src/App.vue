@@ -177,6 +177,17 @@
         </div>
       </div>
 
+      <!-- Add loading indicator and observer target -->
+      <div 
+        v-if="hasMoreImages" 
+        ref="observerTarget"
+        class="flex justify-center items-center py-8"
+      >
+        <div v-if="loadingMore" class="flex items-center justify-center">
+          <div class="loading-spinner"></div>
+        </div>
+      </div>
+      
       <!-- Upload Modal -->
       <div
         v-if="showUploadModal"
@@ -184,55 +195,70 @@
         @click="closeUploadModal"
       >
         <div
-          class="bg-white p-8 rounded-xl max-w-md w-full shadow-2xl"
+          class="bg-white p-8 rounded-xl max-w-md w-full shadow-2xl max-h-[80vh] flex flex-col"
           @click.stop
         >
           <h2 class="text-2xl font-bold mb-6 text-gray-900 dark:text-white">Загрузить</h2>
           <div 
-            v-if="!selectedFile"
-            class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center cursor-pointer hover:border-blue-500 dark:hover:border-[#7034d2a6] transition-colors duration-200"
+            v-if="!selectedFiles.length"
+            class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center cursor-pointer hover:border-blue-500 dark:hover:border-[#7034d2a6] transition-colors duration-200 flex-1"
             @click="fileInput.click()"
             @dragover.prevent
             @drop.prevent="handleDrop"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-            </svg>
-            <p class="mt-4 text-gray-600 dark:text-gray-300 font-medium">Перетащите или добавьте файл</p>
-            <input
-              type="file"
-              ref="fileInput"
-              accept="image/*"
-              class="hidden"
-              @change="handleFileSelect"
-            >
+            <div class="flex flex-col items-center justify-center h-full">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+              </svg>
+              <p class="mt-4 text-gray-600 dark:text-gray-300 font-medium">Перетащите или добавьте файлы</p>
+              <input
+                type="file"
+                ref="fileInput"
+                accept="image/*"
+                multiple
+                class="hidden"
+                @change="handleFileSelect"
+              >
+            </div>
           </div>
           <div 
             v-else
-            class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 text-center"
+            class="flex-1 flex flex-col min-h-0"
           >
-            <div class="relative">
-              <img
-                :src="previewUrl"
-                alt="Preview"
-                class="max-h-64 mx-auto rounded-lg object-contain"
-              >
-              <button
-                @click="removeSelectedFile"
-                class="absolute top-2 right-2 p-1 rounded-full bg-gray-800 bg-opacity-50 hover:bg-opacity-70 transition-opacity"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-            <div class="mt-4">
-              <input
-                v-model="imageName"
-                type="text"
-                :placeholder="selectedFile.name"
-                class="w-full px-4 py-2 rounded-lg bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
+            <div class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 overflow-y-auto flex-1">
+              <div class="space-y-4">
+                <div v-for="(file, index) in selectedFiles" :key="index" class="relative">
+                  <div class="flex items-center gap-4 mb-2">
+                    <img
+                      :src="previewUrls[index]"
+                      alt="Preview"
+                      class="h-16 w-16 object-cover rounded"
+                    >
+                    <div class="flex-1 min-w-0">
+                      <p 
+                        class="text-sm font-medium truncate" 
+                        :title="file.name"
+                      >
+                        {{ file.name.length > 25 ? file.name.substring(0, 25) + '...' : file.name }}
+                      </p>
+                      <div v-if="uploadProgress[index] !== undefined" class="w-full h-2 bg-gray-200 rounded-full mt-2">
+                        <div 
+                          class="h-full tag-bg rounded-full transition-all duration-300"
+                          :style="{ width: `${uploadProgress[index]}%` }"
+                        ></div>
+                      </div>
+                    </div>
+                    <button
+                      @click="removeFile(index)"
+                      class="p-1 rounded-full bg-gray-800 bg-opacity-50 hover:bg-opacity-70 transition-opacity flex-shrink-0"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
           <div class="mt-6 flex justify-end gap-4">
@@ -243,10 +269,11 @@
               Отмена
             </button>
             <button
-              @click="uploadImage"
-              class="px-6 py-2 tag-bg rounded-lg font-medium transition-colors duration-200 dark:tag-bg"
+              @click="uploadImages"
+              :disabled="isUploading"
+              class="px-6 py-2 tag-bg rounded-lg font-medium transition-colors duration-200 dark:tag-bg disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Добавить
+              {{ isUploading ? 'Загрузка...' : 'Добавить' }}
             </button>
           </div>
         </div>
@@ -304,17 +331,17 @@
             <div class="flex items-center gap-6">
               <a href="#" class="text-gray-300 hover:text-white transition-colors duration-200">
                 <svg class="h-8 w-8" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                  <path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.237 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/>
                 </svg>
               </a>
               <a href="#" class="text-gray-300 hover:text-white transition-colors duration-200">
                 <svg class="h-8 w-8" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
+                  <path d="M15.684 0H8.316C1.592 0 0 1.592 0 8.316v7.368C0 22.408 1.592 24 8.316 24h7.368C22.408 24 24 22.408 24 15.684V8.316C24 1.592 22.408 0 15.684 0zm3.692 17h-1.372c-.538 0-.691-.447-1.666-1.422-1.023-1.023-1.503-1.193-1.768-1.193-.36.008-.411.254-.411.619v1.297c0 .34-.134.539-1.117.539-1.244.043-2.427-.105-3.438-.831a11.159 11.159 0 01-3.086-3.348c-1.593-2.329-2.228-4.146-2.228-4.528 0-.188.082-.366.537-.366h1.645c.39 0 .537.172.691.573.768 2.204 2.043 4.129 2.563 4.129.195 0 .283-.089.283-.573v-2.329c-.06-1.027-.602-1.112-.602-1.476 0-.172.142-.344.369-.344h2.563c.351 0 .46.172.46.573v3.149c0 .337.142.46.23.46.195 0 .351-.123.703-.475.999-1.115 1.707-2.83 1.707-2.83.09-.197.254-.38.644-.38h1.645c.499 0 .602.254.499.573-.207.96-2.254 3.859-2.254 3.859-.172.287-.23.41 0 .722.172.254.723.779 1.092 1.25.681.85 1.201 1.562 1.35 2.062.135.466-.101.703-.57.703z"/>
                 </svg>
               </a>
               <a href="#" class="text-gray-300 hover:text-white transition-colors duration-200">
                 <svg class="h-8 w-8" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 0C8.74 0 8.333.015 7.053.072 5.775.132 4.905.333 4.14.63c-.789.306-1.459.717-2.126 1.384S.935 3.35.63 4.14C.333 4.905.131 5.775.072 7.053.012 8.333 0 8.74 0 12s.015 3.667.072 4.947c.06 1.277.261 2.148.558 2.913.306.788.717 1.459 1.384 2.126.667.666 1.336 1.079 2.126 1.384.766.296 1.636.499 2.913.558C8.333 23.988 8.74 24 12 24s3.667-.015 4.947-.072c1.277-.06 2.148-.262 2.913-.558.788-.306 1.459-.718 2.126-1.384.666-.667 1.079-1.335 1.384-2.126.296-.765.499-1.636.558-2.913.06-1.28.072-1.687.072-4.947s-.015-3.667-.072-4.947c-.06-1.277-.262-2.149-.558-2.913-.306-.789-.718-1.459-1.384-2.126C21.319 1.347 20.651.935 19.86.63c-.765-.297-1.636-.499-2.913-.558C15.667.012 15.26 0 12 0zm0 2.16c3.203 0 3.585.016 4.85.071 1.17.055 1.805.249 2.227.415.562.217.96.477 1.382.896.419.42.679.819.896 1.381.164.422.36 1.057.413 2.227.057 1.266.07 1.646.07 4.85s-.015 3.585-.074 4.85c-.061 1.17-.256 1.805-.421 2.227-.224.562-.479.96-.899 1.382-.419.419-.824.679-1.38.896-.42.164-1.065.36-2.235.413-1.274.057-1.649.07-4.859.07-3.211 0-3.586-.015-4.859-.074-1.171-.061-1.816-.256-2.236-.421-.569-.224-.96-.479-1.379-.899-.421-.419-.69-.824-.9-1.38-.165-.42-.359-1.065-.42-2.235-.045-1.26-.061-1.649-.061-4.844 0-3.196.016-3.586.061-4.861.061-1.17.255-1.814.42-2.234.21-.57.479-.96.9-1.381.419-.419.81-.689 1.379-.898.42-.166 1.051-.361 2.221-.421 1.275-.045 1.65-.06 4.859-.06l.045.03zm0 3.678c-3.405 0-6.162 2.76-6.162 6.162 0 3.405 2.76 6.162 6.162 6.162 3.405 0 6.162-2.76 6.162-6.162 0-3.405-2.76-6.162-6.162-6.162zM12 16c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm7.846-10.405c0 .795-.646 1.44-1.44 1.44-.795 0-1.44-.646-1.44-1.44 0-.794.646-1.439 1.44-1.439.793-.001 1.44.645 1.44 1.439z"/>
+                  <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.161c-.18 1.897-.962 6.502-1.359 8.627-.168.9-.5 1.201-.82 1.23-.697.064-1.226-.461-1.901-.903-1.056-.692-1.653-1.123-2.678-1.799-1.185-.781-.417-1.21.258-1.911.177-.184 3.247-2.977 3.307-3.23.007-.032.015-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.139-5.062 3.345-.479.329-.913.489-1.302.481-.428-.009-1.252-.242-1.865-.44-.751-.245-1.349-.374-1.297-.789.027-.216.324-.437.893-.663 3.498-1.524 5.831-2.529 6.998-3.015 3.333-1.386 4.025-1.627 4.477-1.635.099-.002.321.023.465.137.12.095.145.219.137.342l-.002.001z"/>
                 </svg>
               </a>
             </div>
@@ -352,11 +379,21 @@ const isDarkTheme = ref(false)
 const windowWidth = ref(window.innerWidth)
 const canScrollLeft = ref(false)
 const canScrollRight = ref(true)
-const selectedFile = ref(null)
-const imageName = ref('')
+const selectedFiles = ref([])
+const imageNames = ref([])
 const searchInput = ref(null)
-const previewUrl = ref(null)
+const previewUrls = ref([])
+const uploadProgress = ref([])
 const showAnchor = ref(false)
+const isUploading = ref(false)
+
+// Add new refs for pagination
+const currentPage = ref(1)
+const imagesPerPage = ref(12)
+const allImages = ref([])
+const loadingMore = ref(false)
+const hasMoreImages = ref(true)
+const observerTarget = ref(null)
 
 const API_BASE_URL = '/api'
 
@@ -656,18 +693,67 @@ const handleSearch = debounce(async () => {
   }
 }, 300)
 
-// Perform search
+// Modify performSearch to handle pagination
 const performSearch = async () => {
   suggestions.value = []
   try {
     if (selectedTag.value === 'Все фото' || !selectedTag.value) {
-      images.value = mockImages.all
+      allImages.value = mockImages.all
     } else {
-      images.value = mockImages[selectedTag.value] || []
+      allImages.value = mockImages[selectedTag.value] || []
     }
+    currentPage.value = 1
+    loadInitialImages()
   } catch (error) {
     console.error('Ошибка поиска изображений:', error)
   }
+}
+
+// Add new function to load initial images
+const loadInitialImages = () => {
+  const start = 0
+  const end = imagesPerPage.value
+  images.value = allImages.value.slice(start, end)
+  hasMoreImages.value = end < allImages.value.length
+}
+
+// Add new function to load more images
+const loadMoreImages = () => {
+  if (loadingMore.value || !hasMoreImages.value) return
+
+  loadingMore.value = true
+  
+  setTimeout(() => {
+    const start = currentPage.value * imagesPerPage.value
+    const end = start + imagesPerPage.value
+    const newImages = allImages.value.slice(start, end)
+    
+    images.value = [...images.value, ...newImages]
+    currentPage.value++
+    hasMoreImages.value = end < allImages.value.length
+    loadingMore.value = false
+  }, 300) // Small delay to prevent rapid loading
+}
+
+// Add intersection observer setup
+const setupIntersectionObserver = () => {
+  const options = {
+    root: null,
+    rootMargin: '100px',
+    threshold: 0.1
+  }
+
+  const observer = new IntersectionObserver((entries) => {
+    if (entries[0].isIntersecting && !loadingMore.value && hasMoreImages.value) {
+      loadMoreImages()
+    }
+  }, options)
+
+  if (observerTarget.value) {
+    observer.observe(observerTarget.value)
+  }
+
+  return observer
 }
 
 // Select suggestion
@@ -731,66 +817,88 @@ const fetchAlbums = async () => {
 
 // Handle file selection
 const handleFileSelect = (event) => {
-  const file = event.target.files[0]
-  if (file && file.type.startsWith('image/')) {
-    selectedFile.value = file
-    previewUrl.value = URL.createObjectURL(file)
+  const files = event.target.files
+  if (files.length > 0) {
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i]
+      if (file.type.startsWith('image/')) {
+        selectedFiles.value.push(file)
+        previewUrls.value.push(URL.createObjectURL(file))
+      }
+    }
   }
 }
 
 // Handle drag and drop
 const handleDrop = (event) => {
-  const file = event.dataTransfer.files[0]
-  if (file && file.type.startsWith('image/')) {
-    selectedFile.value = file
-    previewUrl.value = URL.createObjectURL(file)
-    fileInput.value.files = event.dataTransfer.files
+  const files = event.dataTransfer.files
+  if (files.length > 0) {
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i]
+      if (file.type.startsWith('image/')) {
+        selectedFiles.value.push(file)
+        previewUrls.value.push(URL.createObjectURL(file))
+      }
+    }
   }
 }
 
 // Close upload modal
 const closeUploadModal = () => {
   showUploadModal.value = false
-  selectedFile.value = null
-  previewUrl.value = null
+  selectedFiles.value = []
+  previewUrls.value = []
+  isUploading.value = false
   if (fileInput.value) {
     fileInput.value.value = ''
   }
 }
 
 // Update uploadImage function
-const uploadImage = async () => {
-  if (!selectedFile.value) {
-    alert('Пожалуйста, выберите изображение')
+const uploadImages = async () => {
+  if (selectedFiles.value.length === 0) {
+    alert('Пожалуйста, выберите изображения')
     return
   }
 
-  const formData = new FormData()
-  formData.append('file', selectedFile.value)
+  isUploading.value = true
+  uploadProgress.value = selectedFiles.value.map(() => 0)
 
   try {
-    console.log('Загрузка файла:', selectedFile.value.name)
-    const response = await axios.post(`${API_BASE_URL}/upload`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      }
+    const uploadPromises = selectedFiles.value.map((file, index) => {
+      const formData = new FormData()
+      formData.append('file', file)
+
+      return axios.post(`${API_BASE_URL}/upload`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        },
+        onUploadProgress: (progressEvent) => {
+          const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total)
+          uploadProgress.value[index] = percentCompleted
+        }
+      })
     })
+
+    const responses = await Promise.all(uploadPromises)
     
-    // Get the uploaded image details from the backend
-    const imageResponse = await axios.get(`${API_BASE_URL}/images/${response.data.id}`)
-    const newImage = {
-      id: response.data.id,
-      filename: selectedFile.value.name,
-      tags: imageResponse.data.tags,
-      url: URL.createObjectURL(selectedFile.value)
-    }
+    const imageResponses = await Promise.all(responses.map(async (response, index) => {
+      const imageResponse = await axios.get(`${API_BASE_URL}/images/${response.data.id}`)
+      return {
+        id: response.data.id,
+        filename: selectedFiles.value[index].name,
+        tags: imageResponse.data.tags,
+        url: URL.createObjectURL(selectedFiles.value[index])
+      }
+    }))
     
-    // Update the images list
-    images.value = [newImage, ...images.value]
+    images.value = [...imageResponses, ...images.value]
     closeUploadModal()
   } catch (error) {
-    console.error('Ошибка загрузки изображения:', error)
-    alert('Ошибка загрузки изображения. Пожалуйста, попробуйте снова.')
+    console.error('Ошибка загрузки изображений:', error)
+    alert('Ошибка загрузки изображений. Пожалуйста, попробуйте снова.')
+  } finally {
+    isUploading.value = false
   }
 }
 
@@ -855,9 +963,9 @@ const focusSearch = () => {
 }
 
 // Add removeSelectedFile function
-const removeSelectedFile = () => {
-  selectedFile.value = null
-  previewUrl.value = null
+const removeFile = (index) => {
+  selectedFiles.value.splice(index, 1)
+  previewUrls.value.splice(index, 1)
   if (fileInput.value) {
     fileInput.value.value = ''
   }
@@ -876,6 +984,15 @@ const handleScroll = () => {
   showAnchor.value = window.scrollY > 500
 }
 
+// Update showUploadModal watcher
+watch(showUploadModal, (newValue) => {
+  if (newValue) {
+    document.body.style.overflow = 'hidden'
+  } else {
+    document.body.style.overflow = ''
+  }
+})
+
 // Initial load
 onMounted(() => {
   initTheme()
@@ -889,6 +1006,16 @@ onMounted(() => {
   if (albumContainer.value) {
     albumContainer.value.addEventListener('scroll', updateScrollButtons)
   }
+
+  // Setup intersection observer
+  const observer = setupIntersectionObserver()
+
+  // Cleanup observer on unmount
+  onUnmounted(() => {
+    if (observerTarget.value) {
+      observer.unobserve(observerTarget.value)
+    }
+  })
 })
 
 // Clean up event listener
@@ -988,8 +1115,8 @@ header{
 }
 
 .dark .tag-bg {
-  background-color: #7034d2a6;
-  color: #f2f1f1;
+  background-color: #7134d26e;
+  color: #e2d5f6;
 }
 
 .dark .tag-bg:hover {
@@ -1057,5 +1184,29 @@ input {
 
 .dark .footer-gradient {
   background: linear-gradient(to bottom, #1a1a1a, #000000);
+}
+
+/* Add rotating dots animation */
+.loading-spinner {
+  width: 24px;
+  height: 24px;
+  border: 3px solid #ABCDEFa6;
+  border-bottom-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.dark .loading-spinner {
+  border-color: #7134d26e;
+  border-bottom-color: transparent;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 </style> 
