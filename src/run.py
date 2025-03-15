@@ -219,12 +219,9 @@ class ProcessManager:
             backend_env = os.environ.copy()
             backend_env["PYTHONPATH"] = os.path.abspath("src/backend")
             
-            # Change to backend directory to ensure correct relative paths
-            backend_dir = os.path.abspath("src/backend")
             process = subprocess.Popen(
-                [sys.executable, "server.py"],
+                [sys.executable, "src/backend/server.py"],
                 env=backend_env,
-                cwd=backend_dir,  # Set working directory
                 # Redirect output to the main console
                 stdout=sys.stdout,
                 stderr=sys.stderr
