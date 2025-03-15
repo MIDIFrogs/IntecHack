@@ -1,9 +1,12 @@
-ImageHound - Image Processing and Search Application
+## **ImageHound** - Image Processing and Search Application
 
 A modern web application for uploading, organizing, and searching images with automatic tag generation using AI-powered object detection and text recognition.
 
 Project Overview
 --------------
+
+![Снимок экрана (927)](https://github.com/user-attachments/assets/9962256c-2c67-490d-9336-946a8d7665a8)
+
 ImageHound is a full-stack web application that allows users to:
 - Upload and organize images
 - Automatically detect objects and text in images
@@ -15,6 +18,8 @@ ImageHound is a full-stack web application that allows users to:
 
 Technical Requirements
 --------------------
+<img width="960" alt="requirements" src="https://github.com/user-attachments/assets/34c6441e-67df-486a-b0d2-deeaae360dae" />
+
 - Python 3.x
 - Node.js and npm
 - Vue.js 3
@@ -28,6 +33,9 @@ Technical Requirements
 
 Features
 --------
+<img width="49%" src="https://github.com/user-attachments/assets/6925d0f3-f01c-4c73-bb65-b353a59af3c9">
+<img width="49%" src="https://github.com/user-attachments/assets/6dfff055-0420-4327-980f-adc4f8e098fa">
+
 1. Image Management:
    - Drag-and-drop image upload
    - Multi-file upload support
