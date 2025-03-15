@@ -13,21 +13,6 @@ ImageHound is a full-stack web application that allows users to:
 - View images by albums/categories
 - Switch between light and dark themes
 
-Project Structure
----------------
-
-.
-├── src/
-│   ├── backend/           # Flask backend
-│   │   ├── server.py     # Main Flask application
-│   │   └── requirements.txt
-│   ├── frontend/         # Vue.js frontend
-│   │   ├── src/
-│   │   │   ├── App.vue  # Main Vue application
-│   │   │   └── main.js
-│   │   └── package.json
-│   └── run.py           # Unified launcher script
-
 Technical Requirements
 --------------------
 - Python 3.x
@@ -36,27 +21,9 @@ Technical Requirements
 - Vue.js 3
 - SQLite
 
-Dependencies
------------
-Backend (Python):
-- flask==3.0.2
-- flask-cors==4.0.0
-- flask-sqlalchemy==3.1.1
-- ultralytics==8.1.27 (YOLOv8)
-- easyocr==1.7.1
-- Pillow==11.1.0
-- python-dotenv==1.0.1
-- SQLAlchemy==2.0.27
-- Werkzeug==3.0.1
-- PyYAML==6.0.1
-- piexif==1.1.3
-- imutils==0.5.4
-
-Frontend:
-- Vue.js 3
-- Tailwind CSS
-- Axios for API calls
-- Inter font family
+- Application uses Flask for backend app and Vue.JS for frontend.
+- Images search is based on SQLite DB run with SQLAlchemy.
+- Detection and text reading are performed with YOLOv8 and EasyOCR
 
 Features
 --------
@@ -90,26 +57,18 @@ Setup Instructions
 ----------------
 
 1. Clone the repository:
-   git clone [repository-url]
-   cd [project-directory]
+   ```
+   git clone https://https://github.com/MIDIFrogs/IntecHack.git
+   cd IntecHack
+   ```
 
-2. Backend Setup:
-   cd src/backend
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
-   pip install -r requirements.txt
-
-3. Frontend Setup:
-   cd src/frontend
-   npm install
-
-4. Running the Application:
+2. Running the Application:
    - Use the unified launcher:
-     python src/run.py
+     `python src/run.py`
    
    OR run services separately:
-   - Backend: python src/backend/server.py
-   - Frontend: cd src/frontend && npm run dev
+   - Backend: `python src/backend/server.py`
+   - Frontend: `cd src/frontend && npm run dev`
 
 The application will be available at:
 - Frontend: http://localhost:5173
@@ -119,17 +78,9 @@ API Endpoints
 ------------
 - POST /api/upload - Upload and process images
 - GET /api/images - Get images list with optional search/tag filters
-- GET /api/images/{id} - Download specific image
+- GET /api/images/{id} - Get info about specific image
+- GET /api/images/{id}/download - Download an image
 - GET /api/albums/tags - Get available tags and their thumbnails
-
-Browser Support
--------------
-- Chrome (recommended)
-- Firefox
-- Safari
-- Edge
-
-Note: For optimal performance, use modern browsers with JavaScript enabled.
 
 Contributing
 -----------
