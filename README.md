@@ -1,81 +1,140 @@
-# Image Processing and Search Web Application
+ImageHound - Image Processing and Search Application
 
-This application allows users to upload images, automatically detect text and objects using YOLOv8 and EasyOCR, and search through the processed images.
+A modern web application for uploading, organizing, and searching images with automatic tag generation using AI-powered object detection and text recognition.
 
-## Project Structure
+Project Overview
+--------------
+ImageHound is a full-stack web application that allows users to:
+- Upload and organize images
+- Automatically detect objects and text in images
+- Search images by tags
+- Browse images in a responsive grid layout
+- Download images
+- View images by albums/categories
+- Switch between light and dark themes
 
-```
+Project Structure
+---------------
+
 .
-├── backend/                 # Flask backend
-│   ├── app/
-│   │   ├── __init__.py
-│   │   ├── models.py       # Database models
-│   │   ├── routes.py       # API routes
-│   │   └── utils.py        # Helper functions
-│   ├── config.py           # Configuration settings
-│   ├── requirements.txt    # Python dependencies
-│   └── run.py             # Application entry point
-├── frontend/               # Vue.js frontend
-│   ├── src/
-│   │   ├── components/    # Vue components
-│   │   ├── views/         # Vue views
-│   │   ├── App.vue
-│   │   └── main.js
-│   ├── package.json
-│   └── vite.config.js
-└── README.md
-```
+├── src/
+│   ├── backend/           # Flask backend
+│   │   ├── server.py     # Main Flask application
+│   │   └── requirements.txt
+│   ├── frontend/         # Vue.js frontend
+│   │   ├── src/
+│   │   │   ├── App.vue  # Main Vue application
+│   │   │   └── main.js
+│   │   └── package.json
+│   └── run.py           # Unified launcher script
 
-## Setup Instructions
+Technical Requirements
+--------------------
+- Python 3.x
+- Node.js and npm
+- Flask
+- Vue.js 3
+- SQLite
 
-### Backend Setup
+Dependencies
+-----------
+Backend (Python):
+- flask==3.0.2
+- flask-cors==4.0.0
+- flask-sqlalchemy==3.1.1
+- ultralytics==8.1.27 (YOLOv8)
+- easyocr==1.7.1
+- Pillow==11.1.0
+- python-dotenv==1.0.1
+- SQLAlchemy==2.0.27
+- Werkzeug==3.0.1
+- PyYAML==6.0.1
+- piexif==1.1.3
+- imutils==0.5.4
 
-1. Create a virtual environment:
-```bash
-cd backend
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-```
+Frontend:
+- Vue.js 3
+- Tailwind CSS
+- Axios for API calls
+- Inter font family
 
-2. Install dependencies:
-```bash
-pip install -r requirements.txt
-```
+Features
+--------
+1. Image Management:
+   - Drag-and-drop image upload
+   - Multi-file upload support
+   - Upload progress tracking
+   - Image preview before upload
 
-3. Run the Flask server:
-```bash
-python run.py
-```
+2. Search and Organization:
+   - Tag-based image search
+   - Auto-complete suggestions
+   - Album view by tags
+   - Horizontal scrollable album navigation
 
-### Frontend Setup
+3. User Interface:
+   - Responsive grid layout
+   - Light/Dark theme toggle
+   - Infinite scroll for image loading
+   - Modern and clean design
+   - "Back to Top" button
+   - Loading indicators
 
-1. Install Node.js dependencies:
-```bash
-cd frontend
-npm install
-```
+4. Image Processing:
+   - Automatic object detection using YOLOv8
+   - Text recognition using EasyOCR
+   - Automatic tag generation
+   - Image metadata extraction
 
-2. Run the development server:
-```bash
-npm run dev
-```
+Setup Instructions
+----------------
 
-## Features
+1. Clone the repository:
+   git clone [repository-url]
+   cd [project-directory]
 
-- Image upload with automatic text and object detection
-- Image search based on detected text and objects
-- Autocomplete suggestions for search
-- Image grid view with download functionality
-- SQLite database for storing image metadata
+2. Backend Setup:
+   cd src/backend
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   pip install -r requirements.txt
 
-## API Endpoints
+3. Frontend Setup:
+   cd src/frontend
+   npm install
 
-- POST /api/upload - Upload image and process it
-- GET /api/images - Get list of images with optional search parameters
-- GET /api/images/<id> - Download specific image
-- GET /api/suggestions - Get search suggestions
+4. Running the Application:
+   - Use the unified launcher:
+     python src/run.py
+   
+   OR run services separately:
+   - Backend: python src/backend/server.py
+   - Frontend: cd src/frontend && npm run dev
 
-## Technologies Used
+The application will be available at:
+- Frontend: http://localhost:5173
+- Backend API: http://localhost:5000
 
-- Backend: Flask, YOLOv8, EasyOCR, SQLite
-- Frontend: Vue.js, Vite
+API Endpoints
+------------
+- POST /api/upload - Upload and process images
+- GET /api/images - Get images list with optional search/tag filters
+- GET /api/images/{id} - Download specific image
+- GET /api/albums/tags - Get available tags and their thumbnails
+
+Browser Support
+-------------
+- Chrome (recommended)
+- Firefox
+- Safari
+- Edge
+
+Note: For optimal performance, use modern browsers with JavaScript enabled.
+
+Contributing
+-----------
+1. Fork the repository
+2. Create your feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a new Pull Request 

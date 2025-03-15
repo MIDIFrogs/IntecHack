@@ -203,3 +203,4 @@ cython_debug/
 .pypirc
 /src/backend/runtime
 *.pt
+/.obsidian
