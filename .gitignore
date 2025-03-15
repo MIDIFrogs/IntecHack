@@ -204,3 +204,4 @@ cython_debug/
 /src/backend/runtime
 *.pt
 /.obsidian
+requirements.png
