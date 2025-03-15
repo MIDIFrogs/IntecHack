@@ -33,7 +33,10 @@ Technical Requirements
 
 Features
 --------
-![Снимок экрана (931)](https://github.com/user-attachments/assets/6925d0f3-f01c-4c73-bb65-b353a59af3c9)![Снимок экрана (934)](https://github.com/user-attachments/assets/6dfff055-0420-4327-980f-adc4f8e098fa)
+<p float="left">
+![Снимок экрана (931)](https://github.com/user-attachments/assets/6925d0f3-f01c-4c73-bb65-b353a59af3c9)
+![Снимок экрана (934)](https://github.com/user-attachments/assets/6dfff055-0420-4327-980f-adc4f8e098fa)
+<\p>
 
 1. Image Management:
    - Drag-and-drop image upload
