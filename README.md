@@ -4,6 +4,9 @@ A modern web application for uploading, organizing, and searching images with au
 
 Project Overview
 --------------
+
+![Снимок экрана (927)](https://github.com/user-attachments/assets/9962256c-2c67-490d-9336-946a8d7665a8)
+
 ImageHound is a full-stack web application that allows users to:
 - Upload and organize images
 - Automatically detect objects and text in images
@@ -30,6 +33,8 @@ Technical Requirements
 
 Features
 --------
+![Снимок экрана (931)](https://github.com/user-attachments/assets/6925d0f3-f01c-4c73-bb65-b353a59af3c9)![Снимок экрана (934)](https://github.com/user-attachments/assets/6dfff055-0420-4327-980f-adc4f8e098fa)
+
 1. Image Management:
    - Drag-and-drop image upload
    - Multi-file upload support
